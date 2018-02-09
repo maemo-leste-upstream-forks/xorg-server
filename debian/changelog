@@ -1,3 +1,9 @@
+xorg-server (2:1.19.2-2) unstable; urgency=medium
+
+  * Add droid4 patches
+
+ -- Ivan J. <parazyd@dyne.org>  Fri, 09 Feb 2018 16:20:00 +0100
+
 xorg-server (2:1.19.2-1+deb9u2) stretch-security; urgency=high
 
   * Unvalidated extra length in ProcEstablishConnection (CVE-2017-12176)
