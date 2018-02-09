@@ -1,3 +1,9 @@
+xorg-server (2:1.19.1-2) unstable; urgency=medium
+
+  * Prepare package for Motorola Droid4 patch
+
+ -- Ivan J. <parazyd@dyne.org>  Fri, 09 Feb 2018 13:30:00
+
 xorg-server (2:1.19.1-1) unstable; urgency=medium
 
   [ Emilio Pozuelo Monfort ]
