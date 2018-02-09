@@ -131,6 +131,7 @@ confflags_main = \
 	--enable-xephyr \
 	--with-sha1=libgcrypt \
 	--enable-xcsecurity \
+	$(config_backend_main) \
 	$(void)
 
 confflags_udeb = \
@@ -163,6 +164,7 @@ confflags_udeb = \
 	--disable-kdrive \
 	--disable-xephyr \
 	--with-sha1=libnettle \
+	$(config_backend_udeb) \
 	$(void)
 
 %:
@@ -219,10 +221,8 @@ override_dh_auto_install:
 	rm -f debian/tmp/udeb/usr/lib/xorg/modules/libwfb.so
 	rm -f debian/tmp/udeb/usr/lib/xorg/modules/libxf8_16bpp.so
 
-	# we don't ship these from the udeb build, needed for dh_install
-	# --fail-missing
-	rm -rf debian/tmp/udeb/var/lib/xkb/README.compiled
-	rm -rf debian/tmp/udeb/usr/bin/X
+	# we don't ship these from the udeb build, reduce noise from dh_install
+	# --list-missing
 	rm -rf debian/tmp/udeb/usr/include
 	rm -rf debian/tmp/udeb/usr/share/aclocal
 	rm -rf debian/tmp/udeb/usr/share/man
@@ -233,8 +233,10 @@ override_dh_auto_install:
 ifneq ($(DEB_HOST_ARCH_OS), linux)
 	install -d debian/tmp/main/usr/share/X11/xorg.conf.d
 	install -m 644 debian/local/10-*.conf debian/tmp/main/usr/share/X11/xorg.conf.d
+ifeq ($(udeb), yes)
 	install -d debian/tmp/udeb/usr/share/X11/xorg.conf.d
 	install -m 644 debian/local/10-*.conf debian/tmp/udeb/usr/share/X11/xorg.conf.d
+endif
 endif
 
 # Only read the first line, the rest of the file is used to determine
@@ -260,13 +262,11 @@ abibumpcheck: debian/serverminver $(QUILT_STAMPFN)
 	rm -f $(SERVERMINVER).new; \
 	fi
 
-override_dh_fixperms-arch:
-	dh_fixperms
-	chown root:root $(CURDIR)/debian/xserver-xorg-legacy/usr/lib/xorg/Xorg.wrap
-	chmod ug+s $(CURDIR)/debian/xserver-xorg-legacy/usr/lib/xorg/Xorg.wrap
-
 override_dh_install:
-	dh_install --fail-missing
+	dh_install
+	-chown root:root $(CURDIR)/debian/xserver-xorg-legacy/usr/lib/xorg/Xorg.wrap
+	-chmod ug+s $(CURDIR)/debian/xserver-xorg-legacy/usr/lib/xorg/Xorg.wrap
+
 	install -d $(CURDIR)/debian/xserver-xorg-dev/usr/share/xserver-xorg
 	# Extract only the major ABI version:
 	abi_videodrv=`PKG_CONFIG_PATH=debian/tmp/main/usr/lib/pkgconfig pkg-config --variable=abi_videodrv xorg-server|cut -d . -f 1`; \
@@ -289,8 +289,10 @@ override_dh_install:
 ifeq ($(DEB_HOST_ARCH_OS), linux)
 	install -d debian/xserver-xorg-core/lib/udev/rules.d
 	install -m 644 debian/local/64-xorg-xkb.rules debian/xserver-xorg-core/lib/udev/rules.d
+ifeq ($(udeb), yes)
 	install -d debian/xserver-xorg-core-udeb/lib/udev/rules.d
 	install -m 644 debian/local/64-xorg-xkb.rules debian/xserver-xorg-core-udeb/lib/udev/rules.d
+endif
 endif
 
 override_dh_strip:
