@@ -1,5 +1,5 @@
 Source: xorg-server
-Section: x11
+Section: droid4
 Priority: optional
 Maintainer: Debian X Strike Force <debian-x@lists.debian.org>
 Build-Depends:
@@ -108,6 +108,7 @@ Homepage: https://www.x.org/
 
 Package: xserver-xorg-core
 Architecture: any
+Section: droid4
 Depends:
  xserver-common (>= ${source:Version}),
  keyboard-configuration [linux-any kfreebsd-any],
