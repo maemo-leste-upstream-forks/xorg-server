@@ -1,5 +1,5 @@
 Source: xorg-server
-Section: droid4
+Section: x11
 Priority: optional
 Maintainer: Debian X Strike Force <debian-x@lists.debian.org>
 Build-Depends:
@@ -148,7 +148,7 @@ Description: Xorg X server - core server
 
 Package: xserver-common
 Architecture: all
-Section: droid4
+Section: x11
 Multi-Arch: foreign
 Depends:
  x11-common,
@@ -164,7 +164,7 @@ Description: common files used by various X servers
 
 Package: xorg-server-source
 Architecture: all
-Section: droid4
+Section: x11
 Depends:
  ${misc:Depends},
 Description: Xorg X server - source files
