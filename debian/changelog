@@ -1,3 +1,9 @@
+xorg-server (2:1.19.2.1) unstable; urgency=medium
+
+  * Release for maemo/stretch
+
+ -- Arthur Demchenkov <spinal.by@gmail.com>  Sat, 08 Feb 2020 02:23:30 +0300
+
 xorg-server (2:1.19.2-2) unstable; urgency=medium
 
   * Add droid4 patches
