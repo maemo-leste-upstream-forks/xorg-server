@@ -1,0 +1,96 @@
+From 89cb06cfe8c8888c66abe56dcffcbcfa40b2c155 Mon Sep 17 00:00:00 2001
+From: parazyd <parazyd@dyne.org>
+Date: Wed, 26 Feb 2020 13:36:51 +0100
+Subject: [PATCH] Modesetting update fb_id.
+
+Looks like drmModeDirtyFB() stopped working at some point and we now
+call it with fb_id of zero for rotated displays. This will stop displays
+relying on DRM_IOCTL_MODE_DIRTYFB ioctl to display anything.
+
+This regression probably with commit 3dcd591fa9b7 ("modesetting: Add
+support for using RandR shadow buffers") that inroduced rotate_fb_id.
+
+Let's fix this issue by copying rotate_fb_id to fb_id if zero and then
+reset it back to zero after we're done with the rotation.
+
+After the fix we then call drmModeDirtyFB() we then have the
+following fb_id changes:
+
+$ startx
+drmmode_get_default_bpp: fb_id: 51
+drmmode_get_default_bpp: cleared fb_id
+dispatch_dirty: ms->drmmode.fb_id: 0 fb_id: 0
+drmmode_set_mode_major: drmmode->fb_id: 52
+dispatch_dirty: ms->drmmode.fb_id: 52 fb_id: 52
+...
+
+$ xrandr --output DSI-1 --rotate right
+drmmode_xf86crtc_resize: cleared old_fb_id
+dispatch_dirty: ms->drmmode.fb_id: 0 fb_id: 0
+drmmode_shadow_allocate: drmmode_crtc->rotate_fb_id: 50
+dispatch_dirty: ms->drmmode.fb_id: 50 fb_id: 50
+...
+
+$ xrandr --output DSI-1 --rotate normal
+drmmode_shadow_destroy: cleared drmmode_crtc->rotate_fb_id
+dispatch_dirty: ms->drmmode.fb_id: 0 fb_id: 0
+dispatch_dirty: ms->drmmode.fb_id: 0 fb_id: 0
+dispatch_dirty: ms->drmmode.fb_id: 0 fb_id: 0
+drmmode_set_mode_major: drmmode->fb_id: 51
+dispatch_dirty: ms->drmmode.fb_id: 51 fb_id: 51
+...
+
+Cc: Hans De Goede <hdegoede at redhat.com>
+Cc: Jason Ekstrand <jason.ekstrand at intel.com>
+Cc: Laurent Pinchart <laurent.pinchart at ideasonboard.com>
+Cc: Sebastian Reichel <sebastian.reichel at collabora.co.uk>
+Cc: Tomi Valkeinen <tomi.valkeinen at ti.com>
+Signed-off-by: Tony Lindgren <tony at atomide.com>
+---
+ hw/xfree86/drivers/modesetting/drmmode_display.c | 10 ++++++++++
+ hw/xfree86/drivers/modesetting/drmmode_display.h |  1 +
+ 2 files changed, 11 insertions(+)
+
+diff --git a/hw/xfree86/drivers/modesetting/drmmode_display.c b/hw/xfree86/drivers/modesetting/drmmode_display.c
+index 336f7686e..b27eed058 100644
+--- a/hw/xfree86/drivers/modesetting/drmmode_display.c
++++ b/hw/xfree86/drivers/modesetting/drmmode_display.c
+@@ -1813,6 +1813,12 @@ drmmode_shadow_allocate(xf86CrtcPtr crtc, int width, int height)
+         return NULL;
+     }
+ 
++    /* Must have proper drmmode->fb_id for drmModeDirtyFB() */
++    if (!drmmode->fb_id) {
++        drmmode->fb_id = drmmode_crtc->rotate_fb_id;
++        drmmode_crtc->reset_fb_id = TRUE;
++    }
++
+ #ifdef GLAMOR_HAS_GBM
+     if (drmmode->gbm)
+         return drmmode_crtc->rotate_bo.gbm;
+@@ -1900,6 +1906,10 @@ drmmode_shadow_destroy(xf86CrtcPtr crtc, PixmapPtr rotate_pixmap, void *data)
+ 
+     if (data) {
+         drmModeRmFB(drmmode->fd, drmmode_crtc->rotate_fb_id);
++        if (drmmode_crtc->reset_fb_id &&
++            drmmode->fb_id == drmmode_crtc->rotate_fb_id)
++            drmmode->fb_id = 0;
++        drmmode_crtc->reset_fb_id = FALSE;
+         drmmode_crtc->rotate_fb_id = 0;
+ 
+         drmmode_bo_destroy(drmmode, &drmmode_crtc->rotate_bo);
+diff --git a/hw/xfree86/drivers/modesetting/drmmode_display.h b/hw/xfree86/drivers/modesetting/drmmode_display.h
+index cde661450..53040f4d0 100644
+--- a/hw/xfree86/drivers/modesetting/drmmode_display.h
++++ b/hw/xfree86/drivers/modesetting/drmmode_display.h
+@@ -168,6 +168,7 @@ typedef struct {
+ 
+     drmmode_bo rotate_bo;
+     unsigned rotate_fb_id;
++    Bool reset_fb_id;
+ 
+     PixmapPtr prime_pixmap;
+     PixmapPtr prime_pixmap_back;
+-- 
+2.25.1
+
