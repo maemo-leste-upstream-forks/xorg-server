@@ -1,3 +1,9 @@
+xorg-server (2:1.19.2.10) unstable; urgency=medium
+
+  * Version bump to be preferred over maemo/ascii
+
+ -- Arthur Demchenkov <spinal.by@gmail.com>  Sun, 08 Mar 2020 13:47:24 +0300
+
 xorg-server (2:1.19.2.1) unstable; urgency=medium
 
   * Release for maemo/stretch
