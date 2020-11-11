@@ -1,3 +1,10 @@
+xorg-server (2:1.20.4.2-1) unstable; urgency=medium
+
+  * Revert "glamor: Require GL_OES_texture_border_clamp for GLES2." to
+    accomodate powervr
+
+ -- Merlijn Wajer <merlijn@wizzup.org>  Wed, 11 Nov 2020 12:04:52 +0100
+
 xorg-server (2:1.20.4.1-1) unstable; urgency=medium
 
   * Add initial XRecord fix - see https://gitlab.freedesktop.org/xorg/xserver/-/issues/1046
