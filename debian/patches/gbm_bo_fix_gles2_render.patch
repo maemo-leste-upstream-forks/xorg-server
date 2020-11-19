@@ -1,0 +1,209 @@
+Index: xorg-server/glamor/glamor.c
+===================================================================
+--- xorg-server.orig/glamor/glamor.c
++++ xorg-server/glamor/glamor.c
+@@ -147,7 +147,12 @@ glamor_bind_texture(glamor_screen_privat
+                     glamor_pixmap_fbo *fbo, Bool destination_red)
+ {
+     glActiveTexture(texture);
+-    glBindTexture(GL_TEXTURE_2D, fbo->tex);
++#ifdef GLAMOR_HAS_GBM
++    if (fbo->ext_img)
++      glBindTexture(GL_TEXTURE_EXTERNAL_OES, fbo->tex);
++    else
++#endif
++      glBindTexture(GL_TEXTURE_2D, fbo->tex);
+ 
+     /* If we're pulling data from a GL_RED texture, then whether we
+      * want to make it an A,0,0,0 result or a 0,0,0,R result depends
+Index: xorg-server/glamor/glamor_copy.c
+===================================================================
+--- xorg-server.orig/glamor/glamor_copy.c
++++ xorg-server/glamor/glamor_copy.c
+@@ -57,6 +57,19 @@ static const glamor_facet glamor_facet_c
+     .use = use_copyarea,
+ };
+ 
++#ifdef GLAMOR_HAS_GBM
++static const glamor_facet glamor_facet_copyarea_drm = {
++    "copy_area",
++    .extensions = "#extension GL_OES_EGL_image_external : require\n",
++    .vs_vars = "attribute vec2 primitive;\n",
++    .vs_exec = (GLAMOR_POS(gl_Position, primitive.xy)
++                "       fill_pos = (fill_offset + primitive.xy) * fill_size_inv;\n"),
++    .fs_exec = "       gl_FragColor = texture2D(sampler, fill_pos);\n",
++    .locations = glamor_program_location_fillsamp_drm | glamor_program_location_fillpos,
++    .use = use_copyarea,
++};
++#endif
++
+ /*
+  * Configure the copy plane program for the current operation
+  */
+@@ -153,6 +166,24 @@ static const glamor_facet glamor_facet_c
+     .use = use_copyplane,
+ };
+ 
++#ifdef GLAMOR_HAS_GBM
++static const glamor_facet glamor_facet_copyplane_drm = {
++    "copy_plane",
++    .version = 130,
++    .extensions = "#extension GL_OES_EGL_image_external : require\n",
++    .vs_vars = "attribute vec2 primitive;\n",
++    .vs_exec = (GLAMOR_POS(gl_Position, (primitive.xy))
++                "       fill_pos = (fill_offset + primitive.xy) * fill_size_inv;\n"),
++    .fs_exec = ("       uvec4 bits = uvec4(round(texture2D(sampler, fill_pos) * bitmul));\n"
++                "       if ((bits & bitplane) != uvec4(0,0,0,0))\n"
++                "               gl_FragColor = fg;\n"
++                "       else\n"
++                "               gl_FragColor = bg;\n"),
++    .locations = glamor_program_location_fillsamp_drm|glamor_program_location_fillpos|glamor_program_location_fg|glamor_program_location_bg|glamor_program_location_bitplane,
++    .use = use_copyplane,
++};
++#endif
++
+ /*
+  * When all else fails, pull the bits out of the GPU and do the
+  * operation with fb
+@@ -382,10 +413,20 @@ glamor_copy_fbo_fbo_draw(DrawablePtr src
+ 
+     if (bitplane) {
+         prog = &glamor_priv->copy_plane_prog;
+-        copy_facet = &glamor_facet_copyplane;
++#ifdef GLAMOR_HAS_GBM
++        if (src_priv->image)
++          copy_facet = &glamor_facet_copyplane_drm;
++        else
++#endif
++          copy_facet = &glamor_facet_copyplane;
+     } else {
+         prog = &glamor_priv->copy_area_prog;
+-        copy_facet = &glamor_facet_copyarea;
++#ifdef GLAMOR_HAS_GBM
++        if (src_priv->image)
++          copy_facet = &glamor_facet_copyarea_drm;
++        else
++#endif
++          copy_facet = &glamor_facet_copyarea;
+     }
+ 
+     if (prog->failed)
+Index: xorg-server/glamor/glamor_egl.c
+===================================================================
+--- xorg-server.orig/glamor/glamor_egl.c
++++ xorg-server/glamor/glamor_egl.c
+@@ -125,12 +125,12 @@ glamor_create_texture_from_image(ScreenP
+     glamor_make_current(glamor_priv);
+ 
+     glGenTextures(1, texture);
+-    glBindTexture(GL_TEXTURE_2D, *texture);
+-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
++    glBindTexture(GL_TEXTURE_EXTERNAL_OES, *texture);
++    glTexParameteri(GL_TEXTURE_EXTERNAL_OES, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
++    glTexParameteri(GL_TEXTURE_EXTERNAL_OES, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+ 
+-    glEGLImageTargetTexture2DOES(GL_TEXTURE_2D, image);
+-    glBindTexture(GL_TEXTURE_2D, 0);
++    glEGLImageTargetTexture2DOES(GL_TEXTURE_EXTERNAL_OES, image);
++    glBindTexture(GL_TEXTURE_EXTERNAL_OES, 0);
+ 
+     return TRUE;
+ }
+@@ -241,8 +241,8 @@ glamor_egl_create_textured_pixmap_from_g
+     }
+     glamor_create_texture_from_image(screen, image, &texture);
+     glamor_set_pixmap_type(pixmap, GLAMOR_TEXTURE_DRM);
+-    glamor_set_pixmap_texture(pixmap, texture);
+     glamor_egl_set_pixmap_image(pixmap, image, used_modifiers);
++    glamor_set_pixmap_texture(pixmap, texture);
+     ret = TRUE;
+ 
+  done:
+Index: xorg-server/glamor/glamor_fbo.c
+===================================================================
+--- xorg-server.orig/glamor/glamor_fbo.c
++++ xorg-server/glamor/glamor_fbo.c
+@@ -268,6 +268,11 @@ glamor_pixmap_attach_fbo(PixmapPtr pixma
+ 
+     pixmap_priv->fbo = fbo;
+ 
++#ifdef GLAMOR_HAS_GBM
++    if (pixmap_priv->image)
++        fbo->ext_img = TRUE;
++#endif
++
+     switch (pixmap_priv->type) {
+     case GLAMOR_TEXTURE_ONLY:
+     case GLAMOR_TEXTURE_DRM:
+Index: xorg-server/glamor/glamor_priv.h
+===================================================================
+--- xorg-server.orig/glamor/glamor_priv.h
++++ xorg-server/glamor/glamor_priv.h
+@@ -318,6 +318,9 @@ typedef struct glamor_pixmap_fbo {
+     int height; /**< height in pixels */
+     GLenum format; /**< GL format used to create the texture. */
+     GLenum type; /**< GL type used to create the texture. */
++#ifdef GLAMOR_HAS_GBM
++    Bool ext_img; /**< whether attached texture is EGLImageKHR backed */
++#endif
+ } glamor_pixmap_fbo;
+ 
+ typedef struct glamor_pixmap_clipped_regions {
+Index: xorg-server/glamor/glamor_program.c
+===================================================================
+--- xorg-server.orig/glamor/glamor_program.c
++++ xorg-server/glamor/glamor_program.c
+@@ -118,6 +118,10 @@ static glamor_location_var location_vars
+         .fs_vars = "uniform sampler2D sampler;\n"
+     },
+     {
++        .location = glamor_program_location_fillsamp_drm,
++        .fs_vars = "uniform samplerExternalOES sampler;\n"
++    },
++    {
+         .location = glamor_program_location_fillpos,
+         .vs_vars = ("uniform vec2 fill_offset;\n"
+                     "uniform vec2 fill_size_inv;\n"
+@@ -199,6 +203,9 @@ static const char vs_template[] =
+ 
+ static const char fs_template[] =
+     "%s"                                /* version */
++#ifdef GLAMOR_HAS_GBM
++    "%s"                                /* extensions */
++#endif
+     GLAMOR_DEFAULT_PRECISION
+     "%s"                                /* defines */
+     "%s"                                /* prim fs_vars */
+@@ -302,6 +309,9 @@ glamor_build_program(ScreenPtr
+     if (asprintf(&fs_prog_string,
+                  fs_template,
+                  str(version_string),
++#ifdef GLAMOR_HAS_GBM
++                 str(prim->extensions),
++#endif
+                  str(defines),
+                  str(prim->fs_vars),
+                  str(fill->fs_vars),
+Index: xorg-server/glamor/glamor_program.h
+===================================================================
+--- xorg-server.orig/glamor/glamor_program.h
++++ xorg-server/glamor/glamor_program.h
+@@ -33,6 +33,7 @@ typedef enum {
+     glamor_program_location_bitplane = 32,
+     glamor_program_location_dash = 64,
+     glamor_program_location_atlas = 128,
++    glamor_program_location_fillsamp_drm = 256,
+ } glamor_program_location;
+ 
+ typedef enum {
+@@ -56,6 +57,9 @@ typedef Bool (*glamor_use_render) (CARD8
+ typedef struct {
+     const char                          *name;
+     const int                           version;
++#ifdef GLAMOR_HAS_GBM
++    const char                          *extensions;
++#endif
+     char                                *vs_defines;
+     char                                *fs_defines;
+     const char                          *vs_vars;

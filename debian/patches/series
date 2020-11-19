@@ -7,3 +7,4 @@
 06_use-intel-only-on-pre-gen4.diff
 07_use-modesetting-driver-by-default-on-GeForce.diff
 0001-Modesetting-update-fb_id.patch
+gbm_bo_fix_gles2_render.patch
