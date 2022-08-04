@@ -7,3 +7,6 @@
 05_Revert-Unload-submodules.diff
 06_use-intel-only-on-pre-gen4.diff
 07_use-modesetting-driver-by-default-on-GeForce.diff
+08_xkb-switch-to-array-index-loops-to-moving-pointers.patch
+09_xkb-add-request-length-validation-for-XkbSetGeometry.patch
+10_xkb-swap-XkbSetDeviceInfo-and-XkbSetDeviceInfoCheck.patch
