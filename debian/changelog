@@ -1,3 +1,13 @@
+xorg-server (2:1.20.11-1+deb11u1) bullseye-security; urgency=high
+
+  * Team upload.
+  * record: Fix out of bounds access in SwapCreateRegister() [CVE-2021-4011]
+  * xfixes: Fix out of bounds access in *ProcXFixesCreatePointerBarrier() [CVE-2021-4009]
+  * Xext: Fix out of bounds access in SProcScreenSaverSuspend() [CVE-2021-4010]
+  * render: Fix out of bounds access in SProcRenderCompositeGlyphs() [CVE-2021-4008]
+
+ -- Julien Cristau <jcristau@debian.org>  Thu, 16 Dec 2021 18:08:23 +0100
+
 xorg-server (2:1.20.11-1) unstable; urgency=medium
 
   * New upstream release.
