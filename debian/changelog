@@ -1,3 +1,9 @@
+xorg-server (2:1.20.4.3-1) unstable; urgency=medium
+
+  * patch: Xi: Use current device active grab to deliver touch events if any
+
+ -- Ivaylo Dimitrov <ivo.g.dimitrov.75@gmail.com>  Wed, 11 Nov 2020 12:04:52 +0100
+
 xorg-server (2:1.20.4.2-1) unstable; urgency=medium
 
   * Revert "glamor: Require GL_OES_texture_border_clamp for GLES2." to
