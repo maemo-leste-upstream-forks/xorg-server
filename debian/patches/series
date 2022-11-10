@@ -10,3 +10,5 @@
 08_xkb-switch-to-array-index-loops-to-moving-pointers.patch
 09_xkb-add-request-length-validation-for-XkbSetGeometry.patch
 10_xkb-swap-XkbSetDeviceInfo-and-XkbSetDeviceInfoCheck.patch
+11_xkb-proof-GetCountedString-against-request-length-at.patch
+12_xkb-fix-some-possible-memleaks-in-XkbGetKbdByName.patch

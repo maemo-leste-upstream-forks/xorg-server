@@ -1,3 +1,10 @@
+xorg-server (2:1.20.11-1+deb11u3) UNRELEASED; urgency=medium
+
+  * xkb: proof GetCountedString against request length attacks (CVE-2022-3550)
+  * xkb: fix some possible memleaks in XkbGetKbdByName (CVE-2022-3551)
+
+ -- Emilio Pozuelo Monfort <pochu@debian.org>  Thu, 10 Nov 2022 13:18:31 +0100
+
 xorg-server (2:1.20.11-1+deb11u2) bullseye-security; urgency=medium
 
   * xkb: add request length validation for XkbSetGeometry (CVE-2022-2319)
