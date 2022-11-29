@@ -1,3 +1,9 @@
+xorg-server (2:1.20.11.1-1) unstable; urgency=medium
+
+  * Rebase Maemo Leste patches from Beowulf
+
+ -- Merlijn Wajer <merlijn@wizzup.org>  Tue, 29 Nov 2022 17:30:54 +0100
+
 xorg-server (2:1.20.11-1+deb11u3) bullseye-security; urgency=medium
 
   * xkb: proof GetCountedString against request length attacks (CVE-2022-3550)
