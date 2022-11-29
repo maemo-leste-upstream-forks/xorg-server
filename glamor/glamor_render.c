@@ -533,8 +533,16 @@ glamor_set_composite_texture(glamor_screen_private *glamor_priv, int unit,
     repeat_type = picture->repeatType;
     switch (picture->repeatType) {
     case RepeatNone:
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+        if (glamor_priv->gl_flavor != GLAMOR_GL_ES2) {
+            /* XXX  GLES2 doesn't support GL_CLAMP_TO_BORDER. */
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S,
+                            GL_CLAMP_TO_BORDER);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T,
+                            GL_CLAMP_TO_BORDER);
+        } else {
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        }
         break;
     case RepeatNormal:
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -565,12 +573,12 @@ glamor_set_composite_texture(glamor_screen_private *glamor_priv, int unit,
         break;
     }
 
-    /* Handle RepeatNone in the shader when the source is missing the
-     * alpha channel, as GL will return an alpha for 1 if the texture
-     * is RGB (no alpha), which we use for 16bpp textures.
-     */
+    /*
+     *  GLES2 doesn't support RepeatNone. We need to fix it anyway.
+     *
+     **/
     if (glamor_pixmap_priv_is_large(pixmap_priv) ||
-        (!PICT_FORMAT_A(picture->format) &&
+        ((!PICT_FORMAT_A(picture->format) || glamor_priv->gl_flavor == GLAMOR_GL_ES2) &&
          repeat_type == RepeatNone && picture->transform)) {
         glamor_pixmap_fbo_fix_wh_ratio(wh, pixmap, pixmap_priv);
         glUniform4fv(wh_location, 1, wh);

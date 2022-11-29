@@ -515,10 +515,6 @@ glamor_init(ScreenPtr screen, unsigned int flags)
 
     gl_version = epoxy_gl_version();
 
-    /* assume a core profile if we are GL 3.1 and don't have ARB_compatibility */
-    glamor_priv->is_core_profile =
-        gl_version >= 31 && !epoxy_has_gl_extension("GL_ARB_compatibility");
-
     shading_version_string = (char *) glGetString(GL_SHADING_LANGUAGE_VERSION);
 
     if (!shading_version_string) {
@@ -573,12 +569,6 @@ glamor_init(ScreenPtr screen, unsigned int flags)
             goto fail;
         }
 
-        if (!glamor_priv->is_core_profile &&
-            !epoxy_has_gl_extension("GL_ARB_texture_border_clamp")) {
-            ErrorF("GL_ARB_texture_border_clamp required\n");
-            goto fail;
-        }
-
         if (!glamor_check_instruction_count(gl_version))
             goto fail;
 
@@ -597,11 +587,6 @@ glamor_init(ScreenPtr screen, unsigned int flags)
 
         if (!epoxy_has_gl_extension("GL_EXT_texture_format_BGRA8888")) {
             ErrorF("GL_EXT_texture_format_BGRA8888 required\n");
-            goto fail;
-        }
-
-        if (!epoxy_has_gl_extension("GL_OES_texture_border_clamp")) {
-            ErrorF("GL_OES_texture_border_clamp required\n");
             goto fail;
         }
     }
@@ -641,6 +626,10 @@ glamor_init(ScreenPtr screen, unsigned int flags)
     glamor_priv->has_dual_blend =
         glamor_priv->glsl_version >= 130 &&
         epoxy_has_gl_extension("GL_ARB_blend_func_extended");
+
+    /* assume a core profile if we are GL 3.1 and don't have ARB_compatibility */
+    glamor_priv->is_core_profile =
+        gl_version >= 31 && !epoxy_has_gl_extension("GL_ARB_compatibility");
 
     glamor_priv->can_copyplane = (gl_version >= 30);
 
