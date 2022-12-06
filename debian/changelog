@@ -1,3 +1,12 @@
+xorg-server (2:21.1.4-3devuan1) experimental; urgency=medium
+
+  * Fork for Devuan.
+  * Patch to use libseat for seat management.
+  * Change to source format 3.0 (quilt).
+  * Refresh patches.
+
+ -- Mark Hindley <mark@hindley.org.uk>  Tue, 13 Dec 2022 16:08:43 +0000
+
 xorg-server (2:21.1.4-3) unstable; urgency=medium
 
   * xkb: proof GetCountedString against request length attacks (CVE-2022-3550)
