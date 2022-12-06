@@ -82,6 +82,7 @@ confflags_udeb = \
 	--disable-xace \
 	--disable-xselinux \
 	--disable-xfree86-utils \
+	--disable-seatd-libseat \
 	--disable-systemd-logind \
 	--without-systemd-daemon \
 	--disable-suid-wrapper \
@@ -96,8 +97,9 @@ ifeq ($(DEB_HOST_ARCH_OS), linux)
 	confflags_main += \
 		--enable-dri3 \
 		--enable-xselinux \
-		--enable-systemd-logind \
-		--with-systemd-daemon
+		--enable-seatd-libseat \
+		--disable-systemd-logind \
+		--without-systemd-daemon
 else
 	confflags_main += \
 		--disable-dri3 \
