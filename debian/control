@@ -72,10 +72,8 @@ Build-Depends:
  x11-xkb-utils,
 # arc4random_buf(), getpeereid()
  libbsd-dev,
-#logind
-  libdbus-1-dev (>= 1.0) [linux-any],
-# systemd-daemon
-  libsystemd-dev [linux-any],
+# seat management
+  libseat-dev,
 Build-Depends-Indep: xz-utils
 Standards-Version: 3.9.8
 Rules-Requires-Root: binary-targets
