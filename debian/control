@@ -95,7 +95,6 @@ Depends:
  ${misc:Depends},
 Recommends:
  libgl1-mesa-dri (>= 7.10.2-4),
- default-logind | logind,
  xcvt,
 Suggests: xfonts-100dpi | xfonts-75dpi, xfonts-scalable
 Breaks:
