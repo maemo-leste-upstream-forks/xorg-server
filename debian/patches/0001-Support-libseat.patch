@@ -21,11 +21,9 @@ Initial Devuan patch for testing.
  create mode 100644 hw/xfree86/common/seatd-libseat.h
  create mode 100644 hw/xfree86/os-support/linux/seatd-libseat.c
 
-diff --git a/configure.ac b/configure.ac
-index 7ef858183..75b207c71 100644
 --- a/configure.ac
 +++ b/configure.ac
-@@ -566,6 +566,7 @@ AC_ARG_ENABLE(pciaccess, AS_HELP_STRING([--enable-pciaccess], [Build Xorg with p
+@@ -566,6 +566,7 @@
  AC_ARG_ENABLE(linux_acpi, AS_HELP_STRING([--disable-linux-acpi], [Disable building ACPI support on Linux (if available).]), [enable_linux_acpi=$enableval], [enable_linux_acpi=yes])
  AC_ARG_ENABLE(linux_apm, AS_HELP_STRING([--disable-linux-apm], [Disable building APM support on Linux (if available).]), [enable_linux_apm=$enableval], [enable_linux_apm=yes])
  AC_ARG_ENABLE(systemd-logind, AS_HELP_STRING([--enable-systemd-logind], [Build systemd-logind support (default: auto)]), [SYSTEMD_LOGIND=$enableval], [SYSTEMD_LOGIND=auto])
@@ -33,7 +31,7 @@ index 7ef858183..75b207c71 100644
  AC_ARG_ENABLE(suid-wrapper, AS_HELP_STRING([--enable-suid-wrapper], [Build suid-root wrapper for legacy driver support on rootless xserver systems (default: no)]), [SUID_WRAPPER=$enableval], [SUID_WRAPPER=no])
  
  dnl DDXes.
-@@ -883,6 +884,23 @@ if test "x$CONFIG_HAL" = xyes; then
+@@ -883,6 +884,23 @@
  fi
  AM_CONDITIONAL(CONFIG_HAL, [test "x$CONFIG_HAL" = xyes])
  
@@ -57,9 +55,6 @@ index 7ef858183..75b207c71 100644
  if test "x$SYSTEMD_LOGIND" = xauto; then
          if test "x$HAVE_DBUS" = xyes -a "x$CONFIG_UDEV" = xyes ; then
                  SYSTEMD_LOGIND=yes
-diff --git a/hw/xfree86/common/seatd-libseat.h b/hw/xfree86/common/seatd-libseat.h
-new file mode 100644
-index 000000000..b592574fa
 --- /dev/null
 +++ b/hw/xfree86/common/seatd-libseat.h
 @@ -0,0 +1,40 @@
@@ -103,8 +98,6 @@ index 000000000..b592574fa
 +#endif
 +
 +#endif
-diff --git a/hw/xfree86/common/xf86Events.c b/hw/xfree86/common/xf86Events.c
-index 395bbc7b3..085d870aa 100644
 --- a/hw/xfree86/common/xf86Events.c
 +++ b/hw/xfree86/common/xf86Events.c
 @@ -85,6 +85,7 @@
@@ -115,7 +108,7 @@ index 395bbc7b3..085d870aa 100644
  
  extern void (*xf86OSPMClose) (void);
  
-@@ -309,6 +310,9 @@ xf86DisableInputDeviceForVTSwitch(InputInfoPtr pInfo)
+@@ -309,6 +310,9 @@
  
      xf86ReleaseKeys(pInfo->dev);
      ProcessInputEvents();
@@ -125,7 +118,7 @@ index 395bbc7b3..085d870aa 100644
      DisableDevice(pInfo->dev, TRUE);
  }
  
-@@ -470,9 +474,14 @@ xf86VTEnter(void)
+@@ -470,9 +474,14 @@
      dixSaveScreens(serverClient, SCREEN_SAVER_FORCER, ScreenSaverReset);
  
      for (pInfo = xf86InputDevs; pInfo; pInfo = pInfo->next) {
@@ -140,8 +133,6 @@ index 395bbc7b3..085d870aa 100644
      }
  
      for (ih = InputHandlers; ih; ih = ih->next) {
-diff --git a/hw/xfree86/common/xf86Init.c b/hw/xfree86/common/xf86Init.c
-index 5695e71ac..55f1ec13d 100644
 --- a/hw/xfree86/common/xf86Init.c
 +++ b/hw/xfree86/common/xf86Init.c
 @@ -54,6 +54,7 @@
@@ -152,7 +143,7 @@ index 5695e71ac..55f1ec13d 100644
  
  #include "loaderProcs.h"
  
-@@ -339,6 +340,9 @@ InitOutput(ScreenInfo * pScreenInfo, int argc, char **argv)
+@@ -339,6 +340,9 @@
              DoShowOptions();
  
          dbus_core_init();
@@ -162,7 +153,7 @@ index 5695e71ac..55f1ec13d 100644
          systemd_logind_init();
  
          /* Do a general bus probe.  This will be a PCI probe for x86 platforms */
-@@ -847,6 +851,9 @@ ddxGiveUp(enum ExitCode error)
+@@ -847,6 +851,9 @@
      if (xorgHWOpenConsole)
          xf86CloseConsole();
  
@@ -172,8 +163,6 @@ index 5695e71ac..55f1ec13d 100644
      systemd_logind_fini();
      dbus_core_fini();
  
-diff --git a/hw/xfree86/common/xf86Xinput.c b/hw/xfree86/common/xf86Xinput.c
-index 8cf3f62f0..1ee44c61b 100644
 --- a/hw/xfree86/common/xf86Xinput.c
 +++ b/hw/xfree86/common/xf86Xinput.c
 @@ -64,6 +64,7 @@
@@ -184,7 +173,7 @@ index 8cf3f62f0..1ee44c61b 100644
  
  #include "exevents.h"           /* AddInputDevice */
  #include "exglobals.h"
-@@ -814,8 +815,13 @@ xf86DeleteInput(InputInfoPtr pInp, int flags)
+@@ -814,8 +815,13 @@
  
      FreeInputAttributes(pInp->attrs);
  
@@ -199,7 +188,7 @@ index 8cf3f62f0..1ee44c61b 100644
  
      /* Remove the entry from the list. */
      if (pInp == xf86InputDevs)
-@@ -902,7 +908,9 @@ xf86NewInputDevice(InputInfoPtr pInfo, DeviceIntPtr *pdev, BOOL enable)
+@@ -902,7 +908,9 @@
  {
      InputDriverPtr drv = NULL;
      DeviceIntPtr dev = NULL;
@@ -209,7 +198,7 @@ index 8cf3f62f0..1ee44c61b 100644
      int rval;
      char *path = NULL;
  
-@@ -941,6 +949,10 @@ xf86NewInputDevice(InputInfoPtr pInfo, DeviceIntPtr *pdev, BOOL enable)
+@@ -941,6 +949,10 @@
          xf86stat(path, &pInfo->major, &pInfo->minor);
  
      if (path && (drv->capabilities & XI86_DRV_CAP_SERVER_FD)){
@@ -220,7 +209,7 @@ index 8cf3f62f0..1ee44c61b 100644
          int fd = systemd_logind_take_fd(pInfo->major, pInfo->minor,
                                          path, &paused);
          if (fd != -1) {
-@@ -958,6 +970,7 @@ xf86NewInputDevice(InputInfoPtr pInfo, DeviceIntPtr *pdev, BOOL enable)
+@@ -958,6 +970,7 @@
              pInfo->flags |= XI86_SERVER_FD;
              pInfo->options = xf86ReplaceIntOption(pInfo->options, "fd", fd);
          }
@@ -228,11 +217,9 @@ index 8cf3f62f0..1ee44c61b 100644
      }
  
      free(path);
-diff --git a/hw/xfree86/os-support/linux/Makefile.am b/hw/xfree86/os-support/linux/Makefile.am
-index 4392fe8d4..c58c063d6 100644
 --- a/hw/xfree86/os-support/linux/Makefile.am
 +++ b/hw/xfree86/os-support/linux/Makefile.am
-@@ -19,6 +19,10 @@ ACPI_SRCS = $(srcdir)/../shared/pm_noop.c
+@@ -19,6 +19,10 @@
  endif
  endif
  
@@ -243,7 +230,7 @@ index 4392fe8d4..c58c063d6 100644
  if SYSTEMD_LOGIND
  LOGIND_SRCS = systemd-logind.c
  XORG_CFLAGS += $(DBUS_CFLAGS)
-@@ -36,6 +40,7 @@ liblinux_la_SOURCES = linux.h lnx_init.c lnx_video.c \
+@@ -36,6 +40,7 @@
  		     $(srcdir)/../shared/sigio.c \
                       $(ACPI_SRCS) \
                       $(APM_SRCS) \
@@ -251,8 +238,6 @@ index 4392fe8d4..c58c063d6 100644
                       $(LOGIND_SRCS) \
  		     $(AGP_SRCS)
  
-diff --git a/hw/xfree86/os-support/linux/lnx_platform.c b/hw/xfree86/os-support/linux/lnx_platform.c
-index 8a6be97aa..d6168899f 100644
 --- a/hw/xfree86/os-support/linux/lnx_platform.c
 +++ b/hw/xfree86/os-support/linux/lnx_platform.c
 @@ -19,17 +19,27 @@
@@ -284,7 +269,7 @@ index 8a6be97aa..d6168899f 100644
      fd = systemd_logind_take_fd(attribs->major, attribs->minor, path, &paused);
      if (fd != -1) {
          if (paused) {
-@@ -41,12 +51,15 @@ get_drm_info(struct OdevAttributes *attribs, char *path, int delayed_index)
+@@ -41,12 +51,15 @@
          attribs->fd = fd;
          server_fd = TRUE;
      }
@@ -305,9 +290,6 @@ index 8a6be97aa..d6168899f 100644
  
      /* for a delayed probe we've already added the device */
      if (delayed_index == -1) {
-diff --git a/hw/xfree86/os-support/linux/seatd-libseat.c b/hw/xfree86/os-support/linux/seatd-libseat.c
-new file mode 100644
-index 000000000..6c1db6945
 --- /dev/null
 +++ b/hw/xfree86/os-support/linux/seatd-libseat.c
 @@ -0,0 +1,268 @@
@@ -579,8 +561,6 @@ index 000000000..6c1db6945
 +    }
 +    close( fd );
 +}
-diff --git a/include/dix-config.h.in b/include/dix-config.h.in
-index 382d70609..a78075d20 100644
 --- a/include/dix-config.h.in
 +++ b/include/dix-config.h.in
 @@ -415,6 +415,9 @@
@@ -593,11 +573,9 @@ index 382d70609..a78075d20 100644
  /* Enable systemd-logind integration */
  #undef SYSTEMD_LOGIND 1
  
-diff --git a/include/meson.build b/include/meson.build
-index 3521fa3ef..645a9e7d3 100644
 --- a/include/meson.build
 +++ b/include/meson.build
-@@ -96,6 +96,7 @@ conf_data.set('CONFIG_UDEV', build_udev ? '1' : false)
+@@ -96,6 +96,7 @@
  conf_data.set('CONFIG_UDEV_KMS', build_udev_kms ? '1' : false)
  conf_data.set('HAVE_DBUS', build_dbus ? '1' : false)
  conf_data.set('CONFIG_HAL', build_hal ? '1' : false)
@@ -605,11 +583,9 @@ index 3521fa3ef..645a9e7d3 100644
  conf_data.set('SYSTEMD_LOGIND', build_systemd_logind ? '1' : false)
  conf_data.set('NEED_DBUS', build_systemd_logind or build_hal ? '1' : false)
  conf_data.set('CONFIG_WSCONS', host_machine.system() == 'openbsd' ? '1' : false)
-diff --git a/meson.build b/meson.build
-index a6afd5575..dc207c393 100644
 --- a/meson.build
 +++ b/meson.build
-@@ -172,8 +172,14 @@ if ['windows',  'darwin', 'cygwin'].contains(host_machine.system())
+@@ -172,8 +172,14 @@
      hal_option = 'false'
  endif
  
@@ -625,11 +601,9 @@ index a6afd5575..dc207c393 100644
  else
      build_systemd_logind = get_option('systemd_logind') == 'true'
  endif
-diff --git a/meson_options.txt b/meson_options.txt
-index b12d521ba..a51fab447 100644
 --- a/meson_options.txt
 +++ b/meson_options.txt
-@@ -67,6 +67,8 @@ option('hal', type: 'combo', choices: ['true', 'false', 'auto'], value: 'auto',
+@@ -67,6 +67,8 @@
         description: 'Enable HAL integration')
  option('systemd_logind', type: 'combo', choices: ['true', 'false', 'auto'], value: 'auto',
         description: 'Enable systemd-logind integration')
@@ -638,6 +612,3 @@ index b12d521ba..a51fab447 100644
  option('vgahw', type: 'combo', choices: ['true', 'false', 'auto'], value: 'auto',
         description: 'Xorg VGA access module')
  option('dpms', type: 'boolean', value: true,
--- 
-2.35.1
-

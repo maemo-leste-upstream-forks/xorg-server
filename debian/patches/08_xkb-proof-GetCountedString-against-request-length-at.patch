@@ -13,11 +13,9 @@ Signed-off-by: Peter Hutterer <peter.hutterer@who-t.net>
  xkb/xkb.c | 5 +++++
  1 file changed, 5 insertions(+)
 
-diff --git a/xkb/xkb.c b/xkb/xkb.c
-index f42f59ef3..1841cff26 100644
 --- a/xkb/xkb.c
 +++ b/xkb/xkb.c
-@@ -5137,6 +5137,11 @@ _GetCountedString(char **wire_inout, ClientPtr client, char **str)
+@@ -5137,6 +5137,11 @@
      CARD16 len;
  
      wire = *wire_inout;
@@ -29,6 +27,3 @@ index f42f59ef3..1841cff26 100644
      len = *(CARD16 *) wire;
      if (client->swapped) {
          swaps(&len);
--- 
-2.30.2
-

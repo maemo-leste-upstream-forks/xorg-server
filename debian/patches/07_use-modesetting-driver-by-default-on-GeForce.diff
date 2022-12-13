@@ -21,7 +21,7 @@ Signed-off-by: Ben Skeggs <bskeggs@redhat.com>
  #include "os.h"
  #include "Pci.h"
  #include "xf86.h"
-@@ -1207,6 +1210,25 @@ xf86VideoPtrToDriverList(struct pci_devi
+@@ -1207,6 +1210,25 @@
          int idx = 0;
  
  #if defined(__linux__) || defined(__NetBSD__)

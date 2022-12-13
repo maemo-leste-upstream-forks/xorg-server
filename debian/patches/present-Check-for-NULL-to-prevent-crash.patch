@@ -14,12 +14,10 @@ Tested-by: Aaron Plattner <aplattner@nvidia.com>
  present/present_scmd.c | 6 ++++++
  1 file changed, 6 insertions(+)
 
-diff --git a/present/present_scmd.c b/present/present_scmd.c
-index da836ea6b..239055bc1 100644
 --- a/present/present_scmd.c
 +++ b/present/present_scmd.c
-@@ -158,6 +158,9 @@ present_scmd_get_crtc(present_screen_priv_ptr screen_priv, WindowPtr window)
-     if (!screen_priv->info)
+@@ -161,6 +161,9 @@
+     if (!screen_priv->info->get_crtc)
          return NULL;
  
 +    if (!screen_priv->info->get_crtc)
@@ -28,16 +26,13 @@ index da836ea6b..239055bc1 100644
      return (*screen_priv->info->get_crtc)(window);
  }
  
-@@ -196,6 +199,9 @@ present_flush(WindowPtr window)
-     if (!screen_priv->info)
+@@ -200,6 +203,9 @@
          return;
  
-+    if (!screen_priv->info->flush)
+     if (!screen_priv->info->flush)
 +        return;
 +
-     (*screen_priv->info->flush) (window);
- }
++    if (!screen_priv->info->flush)
+         return;
  
--- 
-2.34.1
-
+     (*screen_priv->info->flush) (window);

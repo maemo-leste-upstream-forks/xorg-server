@@ -11,11 +11,9 @@ Signed-off-by: Peter Hutterer <peter.hutterer@who-t.net>
  xkb/xkb.c | 26 ++++++++++++++++++++------
  1 file changed, 20 insertions(+), 6 deletions(-)
 
-diff --git a/xkb/xkb.c b/xkb/xkb.c
-index 4692895db..b79a269e3 100644
 --- a/xkb/xkb.c
 +++ b/xkb/xkb.c
-@@ -5935,18 +5935,32 @@ ProcXkbGetKbdByName(ClientPtr client)
+@@ -5940,18 +5940,32 @@
      xkb = dev->key->xkbInfo->desc;
      status = Success;
      str = (unsigned char *) &stuff[1];
@@ -54,6 +52,3 @@ index 4692895db..b79a269e3 100644
  
      CHK_MASK_LEGAL(0x01, stuff->want, XkbGBN_AllComponentsMask);
      CHK_MASK_LEGAL(0x02, stuff->need, XkbGBN_AllComponentsMask);
--- 
-2.30.2
-
