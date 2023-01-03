@@ -1,3 +1,9 @@
+xorg-server (2:1.20.11.2-1) unstable; urgency=medium
+
+  * Re-enable logind
+
+ -- Merlijn Wajer <merlijn@wizzup.org>  Tue, 03 Jan 2023 14:49:16 +0100
+
 xorg-server (2:1.20.11.1-1) unstable; urgency=medium
 
   * Rebase Maemo Leste patches from Beowulf
