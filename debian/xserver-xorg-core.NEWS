@@ -1,3 +1,12 @@
+xorg-server (2:21.1.5-1devuan1) unstable; urgency=medium
+
+  This version includes a patch to use libseat for controlling rootless startx and
+  access to input and video devices. libseat can use either seatd or (e)logind
+  as a backend. If you need to override the default choice, use the
+  LIBSEAT_BACKEND environment variable.
+
+ -- Mark Hindley <mark@hindley.org.uk>  Tue, 03 Jan 2023 13:20:48 +0000
+
 xorg-server (2:1.18.3-2) unstable; urgency=medium
 
   X now defaults to using built-in modesetting video driver on Intel
