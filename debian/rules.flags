@@ -99,8 +99,8 @@ ifeq ($(DEB_HOST_ARCH_OS), linux)
 		--enable-dri3 \
 		--enable-xselinux \
 		--enable-xwayland \
-		--disable-systemd-logind \
-		--without-systemd-daemon
+		--enable-systemd-logind \
+		--with-systemd-daemon
 else
 	confflags_main += \
 		--disable-dri3 \
