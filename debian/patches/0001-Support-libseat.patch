@@ -3,7 +3,7 @@ From: Mark Hindley <mark@hindley.org.uk>
 Date: Tue, 13 Dec 2022 16:04:06 +0000
 Subject: [PATCH] Support libseat.
 
-Initial Devuan patch for testing.
+Devuan patch. Equivalent to c2e04ebc2b31d068a43caa83026c74334586b320.
 ---
  configure.ac                                |  18 ++
  hw/xfree86/common/seatd-libseat.h           |  40 +++
@@ -43,61 +43,18 @@ Initial Devuan patch for testing.
 +        fi
 +fi
 +if test "x$SEATD_LIBSEAT" = xyes; then
-+	if ! test "x$CONFIG_UDEV" = xyes ; then
-+		AC_MSG_ERROR([seatd-libseat is only supported in combination with udev configuration.])
++        if ! test "x$CONFIG_UDEV" = xyes ; then
++                AC_MSG_ERROR([seatd-libseat is only supported in combination with udev configuration.])
 +        fi
-+	REQUIRED_LIBS="$REQUIRED_LIBS libseat"
++        REQUIRED_LIBS="$REQUIRED_LIBS libseat"
 +        AC_DEFINE(SEATD_LIBSEAT, 1, [Enable libseat integration])
-+	SYSTEMD_LOGIND=no
++        SYSTEMD_LOGIND=no
 +fi
 +AM_CONDITIONAL(SEATD_LIBSEAT, [test "x$SEATD_LIBSEAT" = xyes])
 +
  if test "x$SYSTEMD_LOGIND" = xauto; then
          if test "x$HAVE_DBUS" = xyes -a "x$CONFIG_UDEV" = xyes ; then
                  SYSTEMD_LOGIND=yes
---- /dev/null
-+++ b/hw/xfree86/common/seatd-libseat.h
-@@ -0,0 +1,40 @@
-+/*
-+ * Copyright © 2022 Mark Hindley, Ralph Ronnquist.
-+ *
-+ * Permission is hereby granted, free of charge, to any person obtaining a
-+ * copy of this software and associated documentation files (the "Software"),
-+ * to deal in the Software without restriction, including without limitation
-+ * the rights to use, copy, modify, merge, publish, distribute, sublicense,
-+ * and/or sell copies of the Software, and to permit persons to whom the
-+ * Software is furnished to do so, subject to the following conditions:
-+ *
-+ * The above copyright notice and this permission notice (including the next
-+ * paragraph) shall be included in all copies or substantial portions of the
-+ * Software.
-+ *
-+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL
-+ * THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-+ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-+ * DEALINGS IN THE SOFTWARE.
-+ *
-+ * Authors: Mark Hindley <mark@hindley.org.uk>
-+ *          Ralph Ronnquist <ralph.ronnquist@gmail.com>
-+ */
-+
-+#ifndef SEATD_LIBSEAT_H
-+#define SEATD_LIBSEAT_H
-+
-+#ifdef SEATD_LIBSEAT
-+#include <xf86Xinput.h>
-+extern int seatd_libseat_init(void);
-+extern void seatd_libseat_fini(void);
-+extern int seatd_libseat_open_graphics(const char *path);
-+extern void seatd_libseat_open_device(InputInfoPtr p);
-+extern void seatd_libseat_close_device(InputInfoPtr p);
-+
-+#endif
-+
-+#endif
 --- a/hw/xfree86/common/xf86Events.c
 +++ b/hw/xfree86/common/xf86Events.c
 @@ -85,6 +85,7 @@
@@ -108,28 +65,23 @@ Initial Devuan patch for testing.
  
  extern void (*xf86OSPMClose) (void);
  
-@@ -309,6 +310,9 @@
+@@ -309,6 +310,7 @@
  
      xf86ReleaseKeys(pInfo->dev);
      ProcessInputEvents();
-+#ifdef SEATD_LIBSEAT
-+    seatd_libseat_close_device( pInfo );
-+#endif
++    seatd_libseat_close_device(pInfo);
      DisableDevice(pInfo->dev, TRUE);
  }
  
-@@ -470,9 +474,14 @@
-     dixSaveScreens(serverClient, SCREEN_SAVER_FORCER, ScreenSaverReset);
+@@ -471,8 +473,10 @@
  
      for (pInfo = xf86InputDevs; pInfo; pInfo = pInfo->next) {
-+#ifdef SEATD_LIBSEAT
-+	seatd_libseat_open_device( pInfo ); // Assign device fd
-+	xf86EnableInputDeviceForVTSwitch( pInfo );
-+#else
          /* Devices with server managed fds get enabled on logind resume */
-         if (!(pInfo->flags & XI86_SERVER_FD))
+-        if (!(pInfo->flags & XI86_SERVER_FD))
++        if (!(pInfo->flags & XI86_SERVER_FD)) {
++            seatd_libseat_open_device(pInfo);
              xf86EnableInputDeviceForVTSwitch(pInfo);
-+#endif
++        }
      }
  
      for (ih = InputHandlers; ih; ih = ih->next) {
@@ -148,7 +100,7 @@ Initial Devuan patch for testing.
  
          dbus_core_init();
 +#ifdef SEATD_LIBSEAT
-+	seatd_libseat_init();
++        seatd_libseat_init();
 +#endif
          systemd_logind_init();
  
@@ -173,50 +125,25 @@ Initial Devuan patch for testing.
  
  #include "exevents.h"           /* AddInputDevice */
  #include "exglobals.h"
-@@ -814,8 +815,13 @@
+@@ -816,6 +817,8 @@
  
-     FreeInputAttributes(pInp->attrs);
- 
--    if (pInp->flags & XI86_SERVER_FD)
-+#ifdef SEATD_LIBSEAT
-+    seatd_libseat_close_device( pInp );
-+#else
-+    if (pInp->flags & XI86_SERVER_FD) {
+     if (pInp->flags & XI86_SERVER_FD)
          systemd_logind_release_fd(pInp->major, pInp->minor, pInp->fd);
-+    }
-+#endif
++    else
++        seatd_libseat_close_device(pInp);
  
      /* Remove the entry from the list. */
      if (pInp == xf86InputDevs)
-@@ -902,7 +908,9 @@
- {
-     InputDriverPtr drv = NULL;
-     DeviceIntPtr dev = NULL;
-+#ifndef SEATD_LIBSEAT
-     Bool paused = FALSE;
-+#endif
-     int rval;
-     char *path = NULL;
- 
-@@ -941,6 +949,10 @@
+@@ -940,7 +943,8 @@
+     if (path && pInfo->major == 0 && pInfo->minor == 0)
          xf86stat(path, &pInfo->major, &pInfo->minor);
  
-     if (path && (drv->capabilities & XI86_DRV_CAP_SERVER_FD)){
-+#ifdef SEATD_LIBSEAT
-+	seatd_libseat_open_device( pInfo );
-+#endif
-+#ifdef SYSTEMD_LOGIND
+-    if (path && (drv->capabilities & XI86_DRV_CAP_SERVER_FD)){
++    if (path && (drv->capabilities & XI86_DRV_CAP_SERVER_FD)) {
++        seatd_libseat_open_device(pInfo);
          int fd = systemd_logind_take_fd(pInfo->major, pInfo->minor,
                                          path, &paused);
          if (fd != -1) {
-@@ -958,6 +970,7 @@
-             pInfo->flags |= XI86_SERVER_FD;
-             pInfo->options = xf86ReplaceIntOption(pInfo->options, "fd", fd);
-         }
-+#endif
-     }
- 
-     free(path);
 --- a/hw/xfree86/os-support/linux/Makefile.am
 +++ b/hw/xfree86/os-support/linux/Makefile.am
 @@ -19,6 +19,10 @@
@@ -240,7 +167,7 @@ Initial Devuan patch for testing.
  
 --- a/hw/xfree86/os-support/linux/lnx_platform.c
 +++ b/hw/xfree86/os-support/linux/lnx_platform.c
-@@ -19,17 +19,27 @@
+@@ -19,17 +19,26 @@
  
  #include "hotplug.h"
  #include "systemd-logind.h"
@@ -257,42 +184,40 @@ Initial Devuan patch for testing.
  
      LogMessage(X_INFO, "Platform probe for %s\n", attribs->syspath);
  
-+#ifdef SEATD_LIBSEAT
-+    fd = seatd_libseat_open_graphics( path );
-+    if ( fd == -1 ) {
-+	LogMessage(X_INFO, "seatd_libseat cannot open graphics\n" );
-+    } else {
++    fd = seatd_libseat_open_graphics(path);
++    if (fd == -1) {
++        LogMessage(X_INFO, "seatd_libseat cannot open graphics\n");
++    }
++    else {
 +        attribs->fd = fd;
 +        server_fd = TRUE;
 +    }
-+#else
      fd = systemd_logind_take_fd(attribs->major, attribs->minor, path, &paused);
      if (fd != -1) {
          if (paused) {
-@@ -41,12 +51,15 @@
+@@ -41,12 +50,14 @@
          attribs->fd = fd;
          server_fd = TRUE;
      }
 -
 -    if (fd == -1)
-+#endif
 +    if (fd == -1) {
-+	// Try opening the path directly
++        // Try opening the path directly
          fd = open(path, O_RDWR | O_CLOEXEC, 0);
 -
 -    if (fd == -1)
 -        return FALSE;
-+	if (fd == -1) {
-+	    xf86Msg(X_ERROR, "cannot open %s\n", path);
-+	    return FALSE;
-+	}
++        if (fd == -1) {
++            xf86Msg(X_ERROR, "cannot open %s\n", path);
++            return FALSE;
++        }
 +    }
  
      /* for a delayed probe we've already added the device */
      if (delayed_index == -1) {
 --- /dev/null
 +++ b/hw/xfree86/os-support/linux/seatd-libseat.c
-@@ -0,0 +1,268 @@
+@@ -0,0 +1,302 @@
 +/*
 + * Copyright © 2022 Mark Hindley, Ralph Ronnquist.
 + *
@@ -339,7 +264,6 @@ Initial Devuan patch for testing.
 +#include "globals.h"
 +#include "seatd-libseat.h"
 +
-+// ==========================================================
 +// ============ libseat client adapter ======================
 +
 +struct libseat_info {
@@ -360,9 +284,11 @@ Initial Devuan patch for testing.
 + * seat devices to ensure that they are operational, as existing fds
 + * may have had their functionality blocked or revoked.
 + */
-+static void enable_seat(struct libseat *seat,void *userdata) {
++static void
++enable_seat(struct libseat *seat, void *userdata)
++{
 +    (void) userdata;
-+    LogMessage( X_INFO, "seatd_libseat enable\n" );
++    LogMessage(X_INFO, "seatd_libseat enable\n");
 +    seat_info.active = TRUE;
 +    seat_info.vt_active = TRUE;
 +    xf86VTEnter();
@@ -376,20 +302,23 @@ Initial Devuan patch for testing.
 + * If the recepient fails to acknowledge the event in time, seat
 + * devices may be forcibly revoked by the seat provider.
 + */
-+static void disable_seat(struct libseat *seat, void *userdata) {
++static void
++disable_seat(struct libseat *seat, void *userdata)
++{
 +    (void) userdata;
-+    LogMessage( X_INFO, "seatd_libseat disable\n" );
++    LogMessage(X_INFO, "seatd_libseat disable\n");
 +    seat_info.vt_active = FALSE;
 +    xf86VTLeave();
-+    if ( libseat_disable_seat( seat ) ) {
-+	LogMessage( X_ERROR, "seatd_libseat disable failed: %d\n", errno );
++    if (libseat_disable_seat(seat)) {
++        LogMessage(X_ERROR, "seatd_libseat disable failed: %d\n", errno);
 +    }
 +}
 +
 +/*
 + * Callbacks for handling the libseat events.
 + */
-+static struct libseat_seat_listener client_callbacks = {
++static struct
++libseat_seat_listener client_callbacks = {
 +    .enable_seat = enable_seat,
 +    .disable_seat = disable_seat,
 +};
@@ -397,14 +326,16 @@ Initial Devuan patch for testing.
 +/*
 + * Check libseat is initialised and active.
 + */
-+static Bool libseat_active(void) {
-+    if ( ! seat_info.client ) {
-+	LogMessage( X_ERROR, "seatd_libseat not initialised!\n" );
++static Bool
++libseat_active(void)
++{
++    if (!seat_info.client) {
++        LogMessage(X_ERROR, "seatd_libseat not initialised!\n");
 +        return FALSE;
 +    }
-+    if ( ! seat_info.active ) {
-+	LogMessage( X_ERROR, "seatd_libseat not active\n" );
-+	return FALSE;
++    if (!seat_info.active) {
++        LogMessage(X_ERROR, "seatd_libseat not active\n");
++        return FALSE;
 +    }
 +    return TRUE;
 +}
@@ -412,10 +343,13 @@ Initial Devuan patch for testing.
 +/*
 + * Handle libseat events
 + */
-+static int libseat_handle_events(int timeout) {
++static int
++libseat_handle_events(int timeout)
++{
 +    int ret;
-+    while ( (ret = libseat_dispatch( seat_info.client, timeout )) > 0)
-+        LogMessage( X_INFO, "seatd_libseat handled %i events\n", ret);
++
++    while ((ret = libseat_dispatch(seat_info.client, timeout)) > 0)
++        LogMessage(X_INFO, "seatd_libseat handled %i events\n", ret);
 +    if (ret == -1) {
 +        LogMessage(X_ERROR, "libseat_dispatch() failed: %s\n", strerror(errno));
 +        return -1;
@@ -426,12 +360,18 @@ Initial Devuan patch for testing.
 +/*
 + * Handle libseat logging.
 + */
-+static void log_libseat(enum libseat_log_level level,
-+                        const char *fmt,
-+                        va_list args) {
++static void
++log_libseat(enum libseat_log_level level, const char *fmt, va_list args)
++{
 +    MessageType xmt;
-+    char xfmt[strlen(fmt)+2];
-+    snprintf(xfmt, sizeof(xfmt), "%s\n", fmt);
++    size_t xfmt_size = strlen(fmt) + 2;
++    char *xfmt;
++
++    xfmt = malloc(xfmt_size);
++    if (xfmt == NULL)
++        return;
++    snprintf(xfmt, xfmt_size, "%s\n", fmt);
++
 +    switch (level) {
 +    case LIBSEAT_LOG_LEVEL_INFO:
 +        xmt = X_INFO;
@@ -440,12 +380,13 @@ Initial Devuan patch for testing.
 +        xmt = X_ERROR;
 +        break;
 +    default:
-+         xmt = X_DEBUG;
++        xmt = X_DEBUG;
 +    }
 +    LogVMessageVerb(xmt, 0, xfmt, args);
++
++    free(xfmt);
 +}
 +
-+// ==========================================================
 +// ============== seatd-libseat.h API functions =============
 +
 +/*
@@ -456,35 +397,39 @@ Initial Devuan patch for testing.
 + *   -EPERM (-1) if it was already initialised
 + *   -EPIPE (-32) if the seat opening failed.
 + */
-+int seatd_libseat_init(void) {
++int
++seatd_libseat_init(void)
++{
 +    libseat_set_log_level(LIBSEAT_LOG_LEVEL_DEBUG);
 +    libseat_set_log_handler(log_libseat);
-+    LogMessage( X_INFO, "seatd_libseat init\n" );
++    LogMessage(X_INFO, "seatd_libseat init\n");
 +    if (libseat_active()) {
-+	LogMessage( X_ERROR, "seatd_libseat already initialised\n" );
-+	return -EPERM;
++        LogMessage(X_ERROR, "seatd_libseat already initialised\n");
++        return -EPERM;
 +    }
 +    seat_info.graphics_id = -1;
-+    seat_info.client = libseat_open_seat( &client_callbacks, NULL );
-+    if ( ! seat_info.client ) {
-+	LogMessage( X_ERROR, "Cannot set up seatd_libseat client\n" );
-+	return -EPIPE;
++    seat_info.client = libseat_open_seat(&client_callbacks, NULL);
++    if (!seat_info.client) {
++        LogMessage(X_ERROR, "Cannot set up seatd_libseat client\n");
++        return -EPIPE;
 +    }
 +    if (libseat_handle_events(100) < 0) {
 +        libseat_close_seat(seat_info.client);
 +        return -EPIPE;
 +    }
-+    LogMessage( X_INFO, "seatd_libseat client activated\n" );
++    LogMessage(X_INFO, "seatd_libseat client activated\n");
 +    return 0;
 +}
 +
 +/*
 + * Shutdown the libseat client.
 + */
-+void seatd_libseat_fini(void) {
-+    LogMessage( X_INFO, "seatd_libseat fini\n" );
-+    if ( seat_info.client )
-+        libseat_close_seat( seat_info.client );
++void
++seatd_libseat_fini(void)
++{
++    LogMessage(X_INFO, "seatd_libseat fini\n");
++    if (seat_info.client)
++        libseat_close_seat(seat_info.client);
 +    seat_info.graphics_id = -1;
 +    seat_info.active = FALSE;
 +    seat_info.client = NULL;
@@ -499,17 +444,23 @@ Initial Devuan patch for testing.
 + *   -EAGAIN (-11) if the VT is not active
 + *   -errno from libseat_open_device if device access failed
 + */
-+int seatd_libseat_open_graphics(const char *path) {
++int
++seatd_libseat_open_graphics(const char *path)
++{
 +    int fd, id;
-+    LogMessage( X_INFO, "seatd_libseat try open graphics %s\n", path );
-+    if ( ! libseat_active() ) {
-+	return -EPERM;
++
++    LogMessage(X_INFO, "seatd_libseat try open graphics %s\n", path);
++    if (!libseat_active()) {
++        return -EPERM;
 +    }
-+    if ( (id = libseat_open_device( seat_info.client, path, &fd )) == -1 ) {
-+	fd = -errno;
-+        LogMessage( X_ERROR, "seatd_libseat open graphics %s (%d) failed: %d\n", path, id, fd );
-+    } else {
-+        LogMessage( X_INFO, "seatd_libseat opened graphics: %s (%d:%d)\n", path, id, fd );
++    if ((id = libseat_open_device(seat_info.client, path, &fd)) == -1) {
++        fd = -errno;
++        LogMessage(X_ERROR, "seatd_libseat open graphics %s (%d) failed: %d\n",
++                   path, id, fd);
++    }
++    else {
++        LogMessage(X_INFO, "seatd_libseat opened graphics: %s (%d:%d)\n", path,
++                   id, fd);
 +    }
 +    seat_info.graphics_id = id;
 +    return fd;
@@ -521,45 +472,53 @@ Initial Devuan patch for testing.
 + * The function sets the p->options "libseat_id" for the device when
 + * successful.
 + */
-+void seatd_libseat_open_device(InputInfoPtr p) {
++void
++seatd_libseat_open_device(InputInfoPtr p)
++{
 +    int id, fd;
 +    char *path = xf86CheckStrOption(p->options, "Device", NULL);
-+    LogMessage( X_INFO, "seatd_libseat try open %s\n", path );
-+    if ( ! libseat_active() ) {
-+	return;
++
++    LogMessage(X_INFO, "seatd_libseat try open %s\n", path);
++    if (!libseat_active()) {
++        return;
 +    }
-+    if ( (id = libseat_open_device( seat_info.client, path, &fd) ) == -1 ) {
-+	fd = -errno;
-+        LogMessage( X_ERROR, "seatd_libseat open %s (%d) failed: %d\n", path, id,  fd );
-+    } else {
-+        p->options = xf86ReplaceIntOption( p->options, "fd", fd );
-+        p->options = xf86ReplaceIntOption( p->options, "libseat_id", id );
-+        LogMessage( X_INFO, "seatd_libseat opened %s (%d:%d)\n", path, id,  fd );
++    if ((id = libseat_open_device(seat_info.client, path, &fd)) == -1) {
++        fd = -errno;
++        LogMessage(X_ERROR, "seatd_libseat open %s (%d) failed: %d\n", path, id,
++                   fd);
++    }
++    else {
++        p->options = xf86ReplaceIntOption(p->options, "fd", fd);
++        p->options = xf86ReplaceIntOption(p->options, "libseat_id", id);
++        LogMessage(X_INFO, "seatd_libseat opened %s (%d:%d)\n", path, id, fd);
 +    }
 +}
 +
 +/*
 + * Release an input device.
 + */
-+void seatd_libseat_close_device(InputInfoPtr p) {
++void
++seatd_libseat_close_device(InputInfoPtr p)
++{
 +    char *path = xf86CheckStrOption(p->options, "Device", NULL);
 +    int fd = xf86CheckIntOption(p->options, "fd", -1);
 +    int id = xf86CheckIntOption(p->options, "libseat_id", -1);
-+    LogMessage( X_INFO, "seatd_libseat try close %s (%d:%d)\n", path, id, fd );
++
++    LogMessage(X_INFO, "seatd_libseat try close %s (%d:%d)\n", path, id, fd);
 +    if (!libseat_active())
 +        return;
-+    if ( fd < 0 ) {
-+        LogMessage( X_ERROR, "seatd_libseat device not open (%s)\n", path );
-+	return;
++    if (fd < 0) {
++        LogMessage(X_ERROR, "seatd_libseat device not open (%s)\n", path);
++        return;
 +    }
-+    if ( id < 0 ) {
-+        LogMessage( X_ERROR, "seatd_libseat no libseat ID\n" );
-+	return;
++    if (id < 0) {
++        LogMessage(X_ERROR, "seatd_libseat no libseat ID\n");
++        return;
 +    }
-+    if ( libseat_close_device( seat_info.client, id ) ) {
-+	LogMessage( X_ERROR, "seatd_libseat close failed %d\n", -errno );
++    if (libseat_close_device(seat_info.client, id)) {
++        LogMessage(X_ERROR, "seatd_libseat close failed %d\n", -errno);
 +    }
-+    close( fd );
++    close(fd);
 +}
 --- a/include/dix-config.h.in
 +++ b/include/dix-config.h.in
@@ -568,7 +527,7 @@ Initial Devuan patch for testing.
  #undef CONFIG_HAL
  
 +/* Enable libseat integration */
-+#undef SEATD_LIBSEAT 1
++#undef SEATD_LIBSEAT
 +
  /* Enable systemd-logind integration */
  #undef SYSTEMD_LOGIND 1
@@ -612,3 +571,61 @@ Initial Devuan patch for testing.
  option('vgahw', type: 'combo', choices: ['true', 'false', 'auto'], value: 'auto',
         description: 'Xorg VGA access module')
  option('dpms', type: 'boolean', value: true,
+--- a/include/Makefile.am
++++ b/include/Makefile.am
+@@ -75,6 +75,7 @@
+ 	eventconvert.h eventstr.h inpututils.h \
+ 	probes.h \
+ 	protocol-versions.h \
++	seatd-libseat.h \
+ 	swaprep.h \
+ 	swapreq.h \
+ 	systemd-logind.h \
+--- /dev/null
++++ b/include/seatd-libseat.h
+@@ -0,0 +1,45 @@
++/*
++ * Copyright © 2022 Mark Hindley, Ralph Ronnquist.
++ *
++ * Permission is hereby granted, free of charge, to any person obtaining a
++ * copy of this software and associated documentation files (the "Software"),
++ * to deal in the Software without restriction, including without limitation
++ * the rights to use, copy, modify, merge, publish, distribute, sublicense,
++ * and/or sell copies of the Software, and to permit persons to whom the
++ * Software is furnished to do so, subject to the following conditions:
++ *
++ * The above copyright notice and this permission notice (including the next
++ * paragraph) shall be included in all copies or substantial portions of the
++ * Software.
++ *
++ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
++ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
++ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL
++ * THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
++ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
++ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
++ * DEALINGS IN THE SOFTWARE.
++ *
++ * Authors: Mark Hindley <mark@hindley.org.uk>
++ *          Ralph Ronnquist <ralph.ronnquist@gmail.com>
++ */
++
++#ifndef SEATD_LIBSEAT_H
++#define SEATD_LIBSEAT_H
++
++#ifdef SEATD_LIBSEAT
++#include <xf86Xinput.h>
++extern int seatd_libseat_init(void);
++extern void seatd_libseat_fini(void);
++extern int seatd_libseat_open_graphics(const char *path);
++extern void seatd_libseat_open_device(InputInfoPtr p);
++extern void seatd_libseat_close_device(InputInfoPtr p);
++#else
++#define seatd_libseat_init()
++#define seatd_libseat_fini()
++#define seatd_libseat_open_graphics(path) -1
++#define seatd_libseat_open_device(p)
++#define seatd_libseat_close_device(p)
++#endif
++
++#endif
