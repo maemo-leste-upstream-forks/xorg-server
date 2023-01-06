@@ -1,3 +1,17 @@
+xorg-server (2:21.1.6-1devuan1) unstable; urgency=medium
+
+  * Merge tag 'xorg-server-2_21.1.6-1'
+  * d/rules: remove unnecessary --with-quilt stanza now we use source
+    format quilt (3.0).
+  * Add a NEWS entry about libseat.
+  * d/gbp.conf:
+     - make pristine-tar comment reflect reality.
+     - add debian-tag.
+  * Update libseat patch to be less verbose and fix running as root without
+    -keeptty (Closes: #735).
+
+ -- Mark Hindley <mark@hindley.org.uk>  Fri, 06 Jan 2023 10:33:29 +0000
+
 xorg-server (2:21.1.6-1) unstable; urgency=medium
 
   * New upstream release.
