@@ -95,23 +95,19 @@ Devuan patch. Equivalent to c2e04ebc2b31d068a43caa83026c74334586b320.
  
  #include "loaderProcs.h"
  
-@@ -339,6 +340,9 @@
+@@ -339,6 +340,7 @@
              DoShowOptions();
  
          dbus_core_init();
-+#ifdef SEATD_LIBSEAT
 +        seatd_libseat_init();
-+#endif
          systemd_logind_init();
  
          /* Do a general bus probe.  This will be a PCI probe for x86 platforms */
-@@ -847,6 +851,9 @@
+@@ -847,6 +849,7 @@
      if (xorgHWOpenConsole)
          xf86CloseConsole();
  
-+#ifdef SEATD_LIBSEAT
 +    seatd_libseat_fini();
-+#endif
      systemd_logind_fini();
      dbus_core_fini();
  
@@ -167,7 +163,7 @@ Devuan patch. Equivalent to c2e04ebc2b31d068a43caa83026c74334586b320.
  
 --- a/hw/xfree86/os-support/linux/lnx_platform.c
 +++ b/hw/xfree86/os-support/linux/lnx_platform.c
-@@ -19,17 +19,26 @@
+@@ -19,17 +19,23 @@
  
  #include "hotplug.h"
  #include "systemd-logind.h"
@@ -185,17 +181,14 @@ Devuan patch. Equivalent to c2e04ebc2b31d068a43caa83026c74334586b320.
      LogMessage(X_INFO, "Platform probe for %s\n", attribs->syspath);
  
 +    fd = seatd_libseat_open_graphics(path);
-+    if (fd == -1) {
-+        LogMessage(X_INFO, "seatd_libseat cannot open graphics\n");
-+    }
-+    else {
++    if (fd != -1) {
 +        attribs->fd = fd;
 +        server_fd = TRUE;
 +    }
      fd = systemd_logind_take_fd(attribs->major, attribs->minor, path, &paused);
      if (fd != -1) {
          if (paused) {
-@@ -41,12 +50,14 @@
+@@ -41,12 +47,14 @@
          attribs->fd = fd;
          server_fd = TRUE;
      }
@@ -217,7 +210,7 @@ Devuan patch. Equivalent to c2e04ebc2b31d068a43caa83026c74334586b320.
      if (delayed_index == -1) {
 --- /dev/null
 +++ b/hw/xfree86/os-support/linux/seatd-libseat.c
-@@ -0,0 +1,302 @@
+@@ -0,0 +1,310 @@
 +/*
 + * Copyright © 2022 Mark Hindley, Ralph Ronnquist.
 + *
@@ -330,11 +323,11 @@ Devuan patch. Equivalent to c2e04ebc2b31d068a43caa83026c74334586b320.
 +libseat_active(void)
 +{
 +    if (!seat_info.client) {
-+        LogMessage(X_ERROR, "seatd_libseat not initialised!\n");
++        LogMessageVerb(X_DEBUG, 5, "seatd_libseat not initialised!\n");
 +        return FALSE;
 +    }
 +    if (!seat_info.active) {
-+        LogMessage(X_ERROR, "seatd_libseat not active\n");
++        LogMessage(X_DEBUG, "seatd_libseat not active\n");
 +        return FALSE;
 +    }
 +    return TRUE;
@@ -393,13 +386,21 @@ Devuan patch. Equivalent to c2e04ebc2b31d068a43caa83026c74334586b320.
 + * Initialise the libseat client.
 + *
 + * Returns:
-+ *   0    if all ok
++ *   0 if all ok
++ *   1 if not possible
 + *   -EPERM (-1) if it was already initialised
 + *   -EPIPE (-32) if the seat opening failed.
 + */
 +int
 +seatd_libseat_init(void)
 +{
++    if (!ServerIsNotSeat0() && xf86HasTTYs() && linux_parse_vt_settings(TRUE) && !linux_get_keeptty()) {
++        LogMessage(X_INFO,
++            "seat-libseat: libseat integration requires -keeptty and "
++            "-keeptty was not provided, disabling libseat integration\n");
++        return 1;
++    }
++
 +    libseat_set_log_level(LIBSEAT_LOG_LEVEL_DEBUG);
 +    libseat_set_log_handler(log_libseat);
 +    LogMessage(X_INFO, "seatd_libseat init\n");
@@ -449,10 +450,10 @@ Devuan patch. Equivalent to c2e04ebc2b31d068a43caa83026c74334586b320.
 +{
 +    int fd, id;
 +
-+    LogMessage(X_INFO, "seatd_libseat try open graphics %s\n", path);
 +    if (!libseat_active()) {
 +        return -EPERM;
 +    }
++    LogMessage(X_INFO, "seatd_libseat try open graphics %s\n", path);
 +    if ((id = libseat_open_device(seat_info.client, path, &fd)) == -1) {
 +        fd = -errno;
 +        LogMessage(X_ERROR, "seatd_libseat open graphics %s (%d) failed: %d\n",
@@ -478,10 +479,10 @@ Devuan patch. Equivalent to c2e04ebc2b31d068a43caa83026c74334586b320.
 +    int id, fd;
 +    char *path = xf86CheckStrOption(p->options, "Device", NULL);
 +
-+    LogMessage(X_INFO, "seatd_libseat try open %s\n", path);
 +    if (!libseat_active()) {
 +        return;
 +    }
++    LogMessage(X_INFO, "seatd_libseat try open %s\n", path);
 +    if ((id = libseat_open_device(seat_info.client, path, &fd)) == -1) {
 +        fd = -errno;
 +        LogMessage(X_ERROR, "seatd_libseat open %s (%d) failed: %d\n", path, id,
@@ -504,9 +505,9 @@ Devuan patch. Equivalent to c2e04ebc2b31d068a43caa83026c74334586b320.
 +    int fd = xf86CheckIntOption(p->options, "fd", -1);
 +    int id = xf86CheckIntOption(p->options, "libseat_id", -1);
 +
-+    LogMessage(X_INFO, "seatd_libseat try close %s (%d:%d)\n", path, id, fd);
 +    if (!libseat_active())
 +        return;
++    LogMessage(X_INFO, "seatd_libseat try close %s (%d:%d)\n", path, id, fd);
 +    if (fd < 0) {
 +        LogMessage(X_ERROR, "seatd_libseat device not open (%s)\n", path);
 +        return;
