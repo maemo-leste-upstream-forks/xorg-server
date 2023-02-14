@@ -1,7 +1,7 @@
 DEB_HOST_ARCH_OS ?= $(shell dpkg-architecture -qDEB_HOST_ARCH_OS)
 
 VENDOR = $(shell dpkg-vendor --query Vendor)
-SUPPORT = https://www.debian.org/support
+SUPPORT = https://www.devuan.org/os/community
 
 SOURCE_NAME    :=  xorg-server
 SOURCE_VERSION := $(shell dpkg-parsechangelog -S Version)
