@@ -31,7 +31,7 @@ Devuan patch. Equivalent to c2e04ebc2b31d068a43caa83026c74334586b320.
  AC_ARG_ENABLE(suid-wrapper, AS_HELP_STRING([--enable-suid-wrapper], [Build suid-root wrapper for legacy driver support on rootless xserver systems (default: no)]), [SUID_WRAPPER=$enableval], [SUID_WRAPPER=no])
  
  dnl DDXes.
-@@ -883,6 +884,23 @@
+@@ -882,6 +883,23 @@
  fi
  AM_CONDITIONAL(CONFIG_HAL, [test "x$CONFIG_HAL" = xyes])
  
@@ -210,7 +210,7 @@ Devuan patch. Equivalent to c2e04ebc2b31d068a43caa83026c74334586b320.
      if (delayed_index == -1) {
 --- /dev/null
 +++ b/hw/xfree86/os-support/linux/seatd-libseat.c
-@@ -0,0 +1,310 @@
+@@ -0,0 +1,311 @@
 +/*
 + * Copyright © 2022 Mark Hindley, Ralph Ronnquist.
 + *
@@ -428,9 +428,10 @@ Devuan patch. Equivalent to c2e04ebc2b31d068a43caa83026c74334586b320.
 +void
 +seatd_libseat_fini(void)
 +{
-+    LogMessage(X_INFO, "seatd_libseat fini\n");
-+    if (seat_info.client)
++    if (seat_info.client) {
++        LogMessage(X_INFO, "seatd_libseat finish\n");
 +        libseat_close_seat(seat_info.client);
++    }
 +    seat_info.graphics_id = -1;
 +    seat_info.active = FALSE;
 +    seat_info.client = NULL;
