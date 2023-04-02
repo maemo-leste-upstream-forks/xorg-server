@@ -76,7 +76,6 @@ Build-Depends:
 #logind
   libdbus-1-dev (>= 1.0) [linux-any],
 # systemd-daemon
-  libsystemd-dev [linux-any],
 Build-Depends-Indep: xz-utils
 Standards-Version: 3.9.8
 Rules-Requires-Root: binary-targets
@@ -97,7 +96,6 @@ Depends:
  ${misc:Depends},
 Recommends:
  libgl1-mesa-dri (>= 7.10.2-4),
- default-logind | logind,
 Suggests: xfonts-100dpi | xfonts-75dpi, xfonts-scalable
 Breaks:
  libgl1-mesa-dri (<< 18.0.5),
