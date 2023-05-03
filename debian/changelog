@@ -1,3 +1,9 @@
+xorg-server (2:21.1.7-3devuan1) unstable; urgency=medium
+
+  * Merge tag xorg-server-2_21.1.7-3.
+
+ -- Mark Hindley <mark@hindley.org.uk>  Wed, 03 May 2023 09:43:26 +0100
+
 xorg-server (2:21.1.7-3) unstable; urgency=medium
 
   * Enable DRI2 for the udeb build, needed in addition to DRM support
