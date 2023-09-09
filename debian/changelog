@@ -1,3 +1,9 @@
+xorg-server (2:21.1.7-3devuan2~exp1) experimental; urgency=medium
+
+  * Update libseat support patch with vt switching fixes (Closes: #779).
+
+ -- Mark Hindley <mark@hindley.org.uk>  Sat, 09 Sep 2023 15:03:44 +0100
+
 xorg-server (2:21.1.7-3devuan1) unstable; urgency=medium
 
   * Merge tag xorg-server-2_21.1.7-3.
