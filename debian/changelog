@@ -1,3 +1,10 @@
+xorg-server (2:21.1.8-1) unstable; urgency=medium
+
+  * patches: Drop an obsolete patch. (Closes: #1034413)
+  * New upstream release.
+
+ -- Timo Aaltonen <tjaalton@debian.org>  Tue, 01 Aug 2023 12:26:02 +0300
+
 xorg-server (2:21.1.7-3devuan2~exp1) experimental; urgency=medium
 
   * Update libseat support patch with vt switching fixes (Closes: #779).
