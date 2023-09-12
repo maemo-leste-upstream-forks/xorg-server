@@ -1,3 +1,10 @@
+xorg-server (2:21.1.8-1devuan1) unstable; urgency=medium
+
+  * Merge tag xorg-server-2_21.1.8-1.
+  * Drop patch fixed upstream.
+
+ -- Mark Hindley <mark@hindley.org.uk>  Tue, 12 Sep 2023 08:22:58 +0100
+
 xorg-server (2:21.1.8-1) unstable; urgency=medium
 
   * patches: Drop an obsolete patch. (Closes: #1034413)
