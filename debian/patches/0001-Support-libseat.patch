@@ -2,7 +2,10 @@ From: Mark Hindley <mark@hindley.org.uk>
 Date: Tue, 13 Dec 2022 16:04:06 +0000
 Subject: [PATCH] Support libseat.
 
-Devuan patch. Equivalent to c2e04ebc2b31d068a43caa83026c74334586b320.
+Devuan patch. Equivalent to 0add0593dfaa41e1c138d2b916b6bb5761f493b5.
+
+
+Closes: #793
 ---
  configure.ac                                |  18 ++
  hw/xfree86/common/xf86Events.c              |  24 +-
@@ -10,7 +13,7 @@ Devuan patch. Equivalent to c2e04ebc2b31d068a43caa83026c74334586b320.
  hw/xfree86/common/xf86Xinput.c              |   8 +-
  hw/xfree86/os-support/linux/Makefile.am     |   5 +
  hw/xfree86/os-support/linux/lnx_platform.c  |  20 +-
- hw/xfree86/os-support/linux/seatd-libseat.c | 363 ++++++++++++++++++++++++++++
+ hw/xfree86/os-support/linux/seatd-libseat.c | 386 ++++++++++++++++++++++++++++
  hw/xfree86/os-support/shared/VTsw_usl.c     |   6 +
  include/Makefile.am                         |   1 +
  include/dix-config.h.in                     |   3 +
@@ -18,15 +21,15 @@ Devuan patch. Equivalent to c2e04ebc2b31d068a43caa83026c74334586b320.
  include/seatd-libseat.h                     |  49 ++++
  meson.build                                 |   8 +-
  meson_options.txt                           |   2 +
- 14 files changed, 502 insertions(+), 19 deletions(-)
+ 14 files changed, 525 insertions(+), 19 deletions(-)
  create mode 100644 hw/xfree86/os-support/linux/seatd-libseat.c
  create mode 100644 include/seatd-libseat.h
 
 diff --git a/configure.ac b/configure.ac
-index 81345c5..3f6fee0 100644
+index 60ea2c3..084bcaa 100644
 --- a/configure.ac
 +++ b/configure.ac
-@@ -567,6 +567,7 @@ AC_ARG_ENABLE(pciaccess, AS_HELP_STRING([--enable-pciaccess], [Build Xorg with p
+@@ -566,6 +566,7 @@ AC_ARG_ENABLE(pciaccess, AS_HELP_STRING([--enable-pciaccess], [Build Xorg with p
  AC_ARG_ENABLE(linux_acpi, AS_HELP_STRING([--disable-linux-acpi], [Disable building ACPI support on Linux (if available).]), [enable_linux_acpi=$enableval], [enable_linux_acpi=yes])
  AC_ARG_ENABLE(linux_apm, AS_HELP_STRING([--disable-linux-apm], [Disable building APM support on Linux (if available).]), [enable_linux_apm=$enableval], [enable_linux_apm=yes])
  AC_ARG_ENABLE(systemd-logind, AS_HELP_STRING([--enable-systemd-logind], [Build systemd-logind support (default: auto)]), [SYSTEMD_LOGIND=$enableval], [SYSTEMD_LOGIND=auto])
@@ -34,7 +37,7 @@ index 81345c5..3f6fee0 100644
  AC_ARG_ENABLE(suid-wrapper, AS_HELP_STRING([--enable-suid-wrapper], [Build suid-root wrapper for legacy driver support on rootless xserver systems (default: no)]), [SUID_WRAPPER=$enableval], [SUID_WRAPPER=no])
  
  dnl DDXes.
-@@ -883,6 +884,23 @@ if test "x$CONFIG_HAL" = xyes; then
+@@ -882,6 +883,23 @@ if test "x$CONFIG_HAL" = xyes; then
  fi
  AM_CONDITIONAL(CONFIG_HAL, [test "x$CONFIG_HAL" = xyes])
  
@@ -298,10 +301,10 @@ index 8a6be97..db2dcdf 100644
      if (delayed_index == -1) {
 diff --git a/hw/xfree86/os-support/linux/seatd-libseat.c b/hw/xfree86/os-support/linux/seatd-libseat.c
 new file mode 100644
-index 0000000..f4f32f6
+index 0000000..ba2005d
 --- /dev/null
 +++ b/hw/xfree86/os-support/linux/seatd-libseat.c
-@@ -0,0 +1,363 @@
+@@ -0,0 +1,386 @@
 +/*
 + * Copyright © 2022 Mark Hindley, Ralph Ronnquist.
 + *
@@ -580,6 +583,24 @@ index 0000000..f4f32f6
 +}
 +
 +/*
++ * Find duplicate devices with same major:minor number and assigned
++ * "libseat_id" and, if any, return its file descriptor.
++ */
++static int
++check_duplicate_device(int maj, int min) {
++
++    InputInfoPtr pInfo;
++
++    for (pInfo = xf86InputDevs; pInfo; pInfo = pInfo->next) {
++        if (pInfo->major == maj && pInfo->minor == min &&
++            xf86CheckIntOption(pInfo->options, "libseat_id", -1) >= 0) {
++            return pInfo->fd;
++        }
++    }
++    return -1;
++}
++
++/*
 + * Open an input device.
 + *
 + * The function sets the p->options "libseat_id" for the device when
@@ -594,19 +615,24 @@ index 0000000..f4f32f6
 +    if (!libseat_active()) {
 +        return;
 +    }
-+    LogMessage(X_INFO, "seatd_libseat try open %s\n", path);
-+    if ((id = libseat_open_device(seat_info.client, path, &fd)) == -1) {
-+        fd = -errno;
-+        LogMessage(X_ERROR, "seatd_libseat open %s (%d) failed: %d\n", path, id,
-+                   fd);
++    fd = check_duplicate_device(p->major,p->minor);
++    if (fd < 0) {
++        LogMessage(X_INFO, "seatd_libseat try open %s\n", path);
++        if ((id = libseat_open_device(seat_info.client, path, &fd)) == -1) {
++            fd = -errno;
++            LogMessage(X_ERROR, "seatd_libseat open %s (%d) failed: %d\n",
++                       path, id, fd);
++            return;
++        }
 +    }
 +    else {
-+        p->flags |= XI86_SERVER_FD;
-+        p->fd = fd;
-+        p->options = xf86ReplaceIntOption(p->options, "fd", fd);
-+        p->options = xf86ReplaceIntOption(p->options, "libseat_id", id);
-+        LogMessage(X_INFO, "seatd_libseat opened %s (%d:%d)\n", path, id, fd);
++        LogMessage(X_INFO, "seatd_libseat reuse %d for %s\n", fd, path);
 +    }
++    p->flags |= XI86_SERVER_FD;
++    p->fd = fd;
++    p->options = xf86ReplaceIntOption(p->options, "fd", fd);
++    p->options = xf86ReplaceIntOption(p->options, "libseat_id", id);
++    LogMessage(X_INFO, "seatd_libseat opened %s (%d:%d)\n", path, id, fd);
 +}
 +
 +/*
@@ -709,7 +735,7 @@ index 25b3a90..d66103f 100644
  	swapreq.h \
  	systemd-logind.h \
 diff --git a/include/dix-config.h.in b/include/dix-config.h.in
-index fafb669..44fa331 100644
+index 382d706..5d29337 100644
 --- a/include/dix-config.h.in
 +++ b/include/dix-config.h.in
 @@ -415,6 +415,9 @@
@@ -790,7 +816,7 @@ index 0000000..155f20d
 +
 +#endif
 diff --git a/meson.build b/meson.build
-index bc51d10..7606382 100644
+index 637938a..02af22e 100644
 --- a/meson.build
 +++ b/meson.build
 @@ -172,8 +172,14 @@ if ['windows',  'darwin', 'cygwin'].contains(host_machine.system())
