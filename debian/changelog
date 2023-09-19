@@ -1,3 +1,9 @@
+xorg-server (2:21.1.8-1devuan2) unstable; urgency=medium
+
+  * Update libseat patch to reuse existing file descriptors. (Closes: #793)
+
+ -- Mark Hindley <mark@hindley.org.uk>  Tue, 19 Sep 2023 10:52:44 +0100
+
 xorg-server (2:21.1.8-1devuan1) unstable; urgency=medium
 
   * Merge tag xorg-server-2_21.1.8-1.
