@@ -1,3 +1,10 @@
+xorg-server (2:21.1.7-3devuan2) daedalus-proposed-updates; urgency=medium
+
+  * d/p/0001-Support-libseat.patch: update to handle VT switching.
+    (Closes: #793)
+
+ -- Mark Hindley <mark@hindley.org.uk>  Wed, 27 Sep 2023 11:47:06 +0100
+
 xorg-server (2:21.1.7-3devuan1) unstable; urgency=medium
 
   * Merge tag xorg-server-2_21.1.7-3.
