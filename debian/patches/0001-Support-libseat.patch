@@ -2,16 +2,17 @@ From: Mark Hindley <mark@hindley.org.uk>
 Date: Tue, 13 Dec 2022 16:04:06 +0000
 Subject: [PATCH] Support libseat.
 
-Devuan patch. Equivalent to 0add0593dfaa41e1c138d2b916b6bb5761f493b5.
+Devuan patch. Equivalent to 856af5b4533014f9455bd371bdef5ddc404094c0
 
 
-Closes: #793
+Closes: #799
 ---
  configure.ac                                |  18 ++
  hw/xfree86/common/xf86Events.c              |  24 +-
- hw/xfree86/common/xf86Init.c                |  13 +-
+ hw/xfree86/common/xf86Init.c                |   3 +
  hw/xfree86/common/xf86Xinput.c              |   8 +-
  hw/xfree86/os-support/linux/Makefile.am     |   5 +
+ hw/xfree86/os-support/linux/lnx_init.c      |   8 +-
  hw/xfree86/os-support/linux/lnx_platform.c  |  20 +-
  hw/xfree86/os-support/linux/seatd-libseat.c | 386 ++++++++++++++++++++++++++++
  hw/xfree86/os-support/shared/VTsw_usl.c     |   6 +
@@ -21,7 +22,7 @@ Closes: #793
  include/seatd-libseat.h                     |  49 ++++
  meson.build                                 |   8 +-
  meson_options.txt                           |   2 +
- 14 files changed, 525 insertions(+), 19 deletions(-)
+ 15 files changed, 526 insertions(+), 16 deletions(-)
  create mode 100644 hw/xfree86/os-support/linux/seatd-libseat.c
  create mode 100644 include/seatd-libseat.h
 
@@ -147,7 +148,7 @@ index 395bbc7..51a29c1 100644
  #ifdef XFreeXDGA
      if (!DGAVTSwitch())
 diff --git a/hw/xfree86/common/xf86Init.c b/hw/xfree86/common/xf86Init.c
-index 5695e71..7ce55a7 100644
+index 5695e71..0119d91 100644
 --- a/hw/xfree86/common/xf86Init.c
 +++ b/hw/xfree86/common/xf86Init.c
 @@ -54,6 +54,7 @@
@@ -166,27 +167,8 @@ index 5695e71..7ce55a7 100644
          systemd_logind_init();
  
          /* Do a general bus probe.  This will be a PCI probe for x86 platforms */
-@@ -432,9 +434,10 @@ InitOutput(ScreenInfo * pScreenInfo, int argc, char **argv)
-                 xorgHWOpenConsole = TRUE;
-         }
- 
--        if (xorgHWOpenConsole)
--            xf86OpenConsole();
--        else
-+        if (xorgHWOpenConsole) {
-+            if (!seatd_libseat_controls_session())
-+                xf86OpenConsole();
-+        } else
-             xf86Info.dontVTSwitch = TRUE;
- 
- 	/* Enable full I/O access */
-@@ -844,9 +847,11 @@ ddxGiveUp(enum ExitCode error)
-         xf86Screens[i]->vtSema = FALSE;
-     }
- 
--    if (xorgHWOpenConsole)
-+    if (xorgHWOpenConsole &&
-+        !seatd_libseat_controls_session())
+@@ -847,6 +849,7 @@ ddxGiveUp(enum ExitCode error)
+     if (xorgHWOpenConsole)
          xf86CloseConsole();
  
 +    seatd_libseat_fini();
@@ -250,6 +232,39 @@ index 4392fe8..c58c063 100644
                       $(LOGIND_SRCS) \
  		     $(AGP_SRCS)
  
+diff --git a/hw/xfree86/os-support/linux/lnx_init.c b/hw/xfree86/os-support/linux/lnx_init.c
+index 111b3b4..563dc26 100644
+--- a/hw/xfree86/os-support/linux/lnx_init.c
++++ b/hw/xfree86/os-support/linux/lnx_init.c
+@@ -36,6 +36,7 @@
+ #include "xf86.h"
+ #include "xf86Priv.h"
+ #include "xf86_OSlib.h"
++#include "seatd-libseat.h"
+ 
+ #include <sys/stat.h>
+ #ifdef HAVE_SYS_SYSMACROS_H
+@@ -213,6 +214,11 @@ xf86OpenConsole(void)
+             FatalError("xf86OpenConsole: Cannot open virtual console"
+                        " %d (%s)\n", xf86Info.vtno, strerror(errno));
+ 
++
++        /* If libseat is in control, it handles VT switching. */
++        if (seatd_libseat_controls_session())
++            return;
++
+         /*
+          * Linux doesn't switch to an active vt after the last close of a vt,
+          * so we do this ourselves by remembering which is active now.
+@@ -302,7 +308,7 @@ xf86CloseConsole(void)
+     struct vt_stat vts;
+     int ret;
+ 
+-    if (xf86Info.ShareVTs) {
++    if (xf86Info.ShareVTs || seatd_libseat_controls_session()) {
+         close(xf86Info.consoleFd);
+         return;
+     }
 diff --git a/hw/xfree86/os-support/linux/lnx_platform.c b/hw/xfree86/os-support/linux/lnx_platform.c
 index 8a6be97..db2dcdf 100644
 --- a/hw/xfree86/os-support/linux/lnx_platform.c
