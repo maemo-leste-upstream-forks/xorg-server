@@ -1,3 +1,10 @@
+xorg-server (2:21.1.8-1devuan3) unstable; urgency=medium
+
+  * d/p/0001-Support-libseat.patch: update to open console correctly.
+    (Closes: #799)
+
+ -- Mark Hindley <mark@hindley.org.uk>  Tue, 17 Oct 2023 11:43:40 +0100
+
 xorg-server (2:21.1.8-1devuan2) unstable; urgency=medium
 
   * Update libseat patch to reuse existing file descriptors. (Closes: #793)
