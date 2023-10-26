@@ -4,7 +4,7 @@ There's no libnettle udeb.
 
 --- a/configure.ac
 +++ b/configure.ac
-@@ -1593,7 +1593,7 @@
+@@ -1574,7 +1574,7 @@ fi
  if test "x$with_sha1" = xlibnettle; then
  	AC_DEFINE([HAVE_SHA1_IN_LIBNETTLE], [1],
  	          [Use libnettle SHA1 functions])

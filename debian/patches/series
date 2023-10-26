@@ -2,9 +2,10 @@
 ## Ubuntu patches start with 100.
 0001-Support-libseat.patch
 0002-composite-Fix-use-after-free-of-the-COW.diff
+0001-Xi-randr-fix-handling-of-PropModeAppend-Prepend.patch
+0002-mi-reset-the-PointerWindows-reference-on-screen-swit.patch
 02_kbsd-input-devd.diff
 03_static-nettle.diff
 05_Revert-Unload-submodules.diff
 06_use-intel-only-on-pre-gen4.diff
 07_use-modesetting-driver-by-default-on-GeForce.diff
-present-Check-for-NULL-to-prevent-crash.patch
