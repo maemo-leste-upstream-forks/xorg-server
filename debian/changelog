@@ -1,3 +1,15 @@
+xorg-server (2:21.1.10-1) unstable; urgency=medium
+
+  [ Emilio Pozuelo Monfort ]
+  * Fix build on hurd-amd64. Thanks Samuel Thibault. (Closes: #1055412)
+
+  [ Timo Aaltonen ]
+  * New upstream release.
+    - CVE-2023-6377
+    - CVE-2023-6478
+
+ -- Timo Aaltonen <tjaalton@debian.org>  Wed, 13 Dec 2023 09:51:20 +0200
+
 xorg-server (2:21.1.9-1devuan1) unstable; urgency=medium
 
   * Merge tag xorg-server-2_21.1.9-1.
