@@ -1,3 +1,9 @@
+xorg-server (2:21.1.11-2devuan1) unstable; urgency=medium
+
+  * Merge tag xorg-server-2_21.1.11-2.
+
+ -- Mark Hindley <mark@hindley.org.uk>  Tue, 20 Feb 2024 08:02:13 +0000
+
 xorg-server (2:21.1.11-2) unstable; urgency=medium
 
   [ Salvatore Bonaccorso ]
