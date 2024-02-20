@@ -1,3 +1,22 @@
+xorg-server (2:21.1.11-2) unstable; urgency=medium
+
+  [ Salvatore Bonaccorso ]
+  * dix: Fix use after free in input device shutdown (Closes: #1061110)
+
+ -- Julien Cristau <jcristau@debian.org>  Mon, 22 Jan 2024 13:17:07 +0100
+
+xorg-server (2:21.1.11-1) unstable; urgency=medium
+
+  * New upstream release, fixes:
+    - CVE-2023-6816
+    - CVE-2024-0229
+    - CVE-2024-21885
+    - CVE-2024-21886
+    - CVE-2024-0408
+    - CVE-2024-0409
+
+ -- Julien Cristau <jcristau@debian.org>  Tue, 16 Jan 2024 15:33:53 +0100
+
 xorg-server (2:21.1.10-1devuan1) unstable; urgency=medium
 
   * Merge tag xorg-server-2_21.1.10-1.
