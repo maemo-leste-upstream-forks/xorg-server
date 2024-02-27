@@ -1,5 +1,3 @@
-## Patches with a number < 100 are applied in debian.
-## Ubuntu patches start with 100.
 0001-Support-libseat.patch
 0002-composite-Fix-use-after-free-of-the-COW.diff
 0001-Xi-randr-fix-handling-of-PropModeAppend-Prepend.patch
@@ -9,3 +7,16 @@
 05_Revert-Unload-submodules.diff
 06_use-intel-only-on-pre-gen4.diff
 07_use-modesetting-driver-by-default-on-GeForce.diff
+0010-randr-avoid-integer-truncation-in-length-check-of-Pr.patch
+0011-Xi-allocate-enough-XkbActions-for-our-buttons.patch
+0012-Xi-require-a-pointer-and-keyboard-device-for-XIAttac.patch
+0013-dix-allocate-enough-space-for-logical-button-maps.patch
+0014-dix-Allocate-sufficient-xEvents-for-our-DeviceStateN.patch
+0015-dix-fix-DeviceStateNotify-event-calculation.patch
+0016-Xi-when-creating-a-new-ButtonClass-set-the-number-of.patch
+0017-Xi-flush-hierarchy-events-after-adding-removing-mast.patch
+0018-Xi-do-not-keep-linked-list-pointer-during-recursion.patch
+0019-dix-when-disabling-a-master-float-disabled-slaved-de.patch
+0020-glx-Call-XACE-hooks-on-the-GLX-buffer.patch
+0021-ephyr-xwayland-Use-the-proper-private-key-for-cursor.patch
+0022-dix-Fix-use-after-free-in-input-device-shutdown.patch

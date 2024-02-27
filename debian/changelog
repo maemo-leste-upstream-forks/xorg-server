@@ -1,3 +1,42 @@
+xorg-server (2:21.1.7-3+deb12u5) bookworm-security; urgency=high
+
+  * Non-maintainer upload by the Security Team.
+  * Xi: require a pointer and keyboard device for XIAttachToMaster
+  * dix: allocate enough space for logical button maps (CVE-2023-6816)
+  * dix: Allocate sufficient xEvents for our DeviceStateNotify (CVE-2024-0229)
+  * dix: fix DeviceStateNotify event calculation (CVE-2024-0229)
+  * Xi: when creating a new ButtonClass, set the number of buttons
+    (CVE-2024-0229)
+  * Xi: flush hierarchy events after adding/removing master devices
+    (CVE-2024-21885)
+  * Xi: do not keep linked list pointer during recursion (CVE-2024-21886)
+  * dix: when disabling a master, float disabled slaved devices too
+    (CVE-2024-21886)
+  * ephyr,xwayland: Use the proper private key for cursor
+  * glx: Call XACE hooks on the GLX buffer
+  * dix: Fix use after free in input device shutdown
+
+ -- Salvatore Bonaccorso <carnil@debian.org>  Mon, 22 Jan 2024 07:19:15 +0100
+
+xorg-server (2:21.1.7-3+deb12u4) bookworm-security; urgency=high
+
+  * Non-maintainer upload by the Security Team.
+  * Sync "Xi: allocate enough XkbActions for our buttons" (CVE-2023-6377)
+    The original upstream patch applied for CVE-2023-6377 was incomplete and
+    still allows OOM access.
+    This update syncs the patch with the upstream applied patch.
+
+ -- Salvatore Bonaccorso <carnil@debian.org>  Fri, 15 Dec 2023 06:00:53 +0100
+
+xorg-server (2:21.1.7-3+deb12u3) bookworm-security; urgency=high
+
+  * Non-maintainer upload by the Security Team.
+  * Xi: allocate enough XkbActions for our buttons (CVE-2023-6377)
+  * randr: avoid integer truncation in length check of ProcRRChange*Property
+    (CVE-2023-6478)
+
+ -- Salvatore Bonaccorso <carnil@debian.org>  Sat, 09 Dec 2023 12:06:17 +0100
+
 xorg-server (2:21.1.7-3+deb12u2devuan1) daedalus-security; urgency=high
 
   * Merge Debian 2:21.1.7-3+deb12u2.
