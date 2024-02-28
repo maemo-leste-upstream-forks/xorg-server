@@ -1,3 +1,9 @@
+xorg-server (2:21.1.7-3+deb12u5devuan1) daedalus-security; urgency=medium
+
+  * Import patchset from Debian bookworm-security.
+
+ -- Mark Hindley <mark@hindley.org.uk>  Wed, 28 Feb 2024 09:12:40 +0000
+
 xorg-server (2:21.1.7-3+deb12u5) bookworm-security; urgency=high
 
   * Non-maintainer upload by the Security Team.
