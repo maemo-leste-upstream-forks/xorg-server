@@ -1,3 +1,10 @@
+xorg-server (2:21.1.11-3devuan1) unstable; urgency=medium
+
+  * Merge tag xorg-server-2_21.1.11-3.
+  * Revert to source format 1.0 (same as Debian).
+
+ -- Mark Hindley <mark@hindley.org.uk>  Thu, 04 Apr 2024 19:09:13 +0100
+
 xorg-server (2:21.1.11-3) unstable; urgency=high
 
   [ Chris Hofstaedtler ]
