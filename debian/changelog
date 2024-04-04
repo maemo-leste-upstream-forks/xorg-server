@@ -1,3 +1,27 @@
+xorg-server (2:21.1.11-3) unstable; urgency=high
+
+  [ Chris Hofstaedtler ]
+  * Use udev.pc to place udev files (Closes: #1057945)
+
+  [ Julien Cristau ]
+  * Pull from upstream server-21.1-branch:
+    - hw/xfree86: fix NULL pointer refrence to mode name
+    - Initialize Mode->name in xf86CVTMode()
+    - Allow disabling byte-swapped clients
+    - Xext: SProcSyncCreateFence needs to swap drawable id too
+    - Xi: ProcXIGetSelectedEvents needs to use unswapped length to send
+      reply (CVE-2024-31080)
+    - Xi: ProcXIPassiveGrabDevice needs to use unswapped length to send
+      reply (CVE-2024-31081)
+    - Xquartz: ProcAppleDRICreatePixmap needs to use unswapped length to
+      send reply (CVE-2024-31082)
+    - render: fix refcounting of glyphs during ProcRenderAddGlyphs
+      (CVE-2024-31083)
+  * dix-Fix-use-after-free-in-input-device-shutdown.patch: drop (already
+    cherry-picked).
+
+ -- Julien Cristau <jcristau@debian.org>  Wed, 03 Apr 2024 21:09:12 +0200
+
 xorg-server (2:21.1.11-2devuan1) unstable; urgency=medium
 
   * Merge tag xorg-server-2_21.1.11-2.

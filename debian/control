@@ -74,6 +74,8 @@ Build-Depends:
  libbsd-dev,
 # seat management
   libseat-dev,
+# udev.pc
+  systemd-dev [linux-any],
 Build-Depends-Indep: xz-utils
 Standards-Version: 3.9.8
 Rules-Requires-Root: binary-targets
