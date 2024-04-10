@@ -1,3 +1,11 @@
+xorg-server (2:21.1.12-1) unstable; urgency=medium
+
+  * New upstream release.
+  * render: Avoid possible double-free in ProcRenderAddGlyphs()
+    (closes: #1068470)
+
+ -- Julien Cristau <jcristau@debian.org>  Wed, 10 Apr 2024 10:44:55 +0200
+
 xorg-server (2:21.1.11-3devuan1) unstable; urgency=medium
 
   * Merge tag xorg-server-2_21.1.11-3.
@@ -24,8 +32,7 @@ xorg-server (2:21.1.11-3) unstable; urgency=high
       send reply (CVE-2024-31082)
     - render: fix refcounting of glyphs during ProcRenderAddGlyphs
       (CVE-2024-31083)
-  * dix-Fix-use-after-free-in-input-device-shutdown.patch: drop (already
-    cherry-picked).
+  * dix-Fix-use-after-free-in-input-device-shutdown.patch: drop (now upstream).
 
  -- Julien Cristau <jcristau@debian.org>  Wed, 03 Apr 2024 21:09:12 +0200
 
