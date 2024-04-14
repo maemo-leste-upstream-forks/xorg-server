@@ -1,3 +1,9 @@
+xorg-server (2:21.1.7-3+deb12u7devuan1) daedalus-security; urgency=medium
+
+  * Import patcheset from Debian bookworm-security.
+
+ -- Mark Hindley <mark@hindley.org.uk>  Sun, 14 Apr 2024 15:51:43 +0100
+
 xorg-server (2:21.1.7-3+deb12u7) bookworm-security; urgency=high
 
   * render: Avoid possible double-free in ProcRenderAddGlyphs()
