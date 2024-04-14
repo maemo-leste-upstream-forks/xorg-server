@@ -20,3 +20,8 @@
 0020-glx-Call-XACE-hooks-on-the-GLX-buffer.patch
 0021-ephyr-xwayland-Use-the-proper-private-key-for-cursor.patch
 0022-dix-Fix-use-after-free-in-input-device-shutdown.patch
+0023-render-fix-refcounting-of-glyphs-during-ProcRenderAd.patch
+0024-Xi-ProcXIGetSelectedEvents-needs-to-use-unswapped-le.patch
+0025-Xi-ProcXIPassiveGrabDevice-needs-to-use-unswapped-le.patch
+0026-Xquartz-ProcAppleDRICreatePixmap-needs-to-use-unswap.patch
+0027-render-Avoid-possible-double-free-in-ProcRenderAddGl.patch

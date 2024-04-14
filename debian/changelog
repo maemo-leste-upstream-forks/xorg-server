@@ -1,3 +1,18 @@
+xorg-server (2:21.1.7-3+deb12u7) bookworm-security; urgency=high
+
+  * render: Avoid possible double-free in ProcRenderAddGlyphs()
+
+ -- Julien Cristau <jcristau@debian.org>  Wed, 10 Apr 2024 11:02:46 +0200
+
+xorg-server (2:21.1.7-3+deb12u6) bookworm-security; urgency=high
+
+  * CVE-2024-31080: Heap buffer overread/data leakage in ProcXIGetSelectedEvents
+  * CVE-2024-31081: Heap buffer overread/data leakage in ProcXIPassiveGrabDevice
+  * CVE-2024-31082: Heap buffer overread/data leakage in ProcAppleDRICreatePixmap
+  * CVE-2024-31083: User-after-free in ProcRenderAddGlyphs
+
+ -- Julien Cristau <jcristau@debian.org>  Thu, 04 Apr 2024 11:59:35 +0200
+
 xorg-server (2:21.1.7-3+deb12u5devuan1) daedalus-security; urgency=medium
 
   * Import patchset from Debian bookworm-security.
