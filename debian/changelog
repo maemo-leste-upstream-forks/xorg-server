@@ -1,3 +1,19 @@
+xorg-server (2:21.1.13-2) unstable; urgency=medium
+
+  * patches: Fix i386 build with gcc-14.
+
+ -- Timo Aaltonen <tjaalton@debian.org>  Thu, 29 Aug 2024 15:54:05 +0300
+
+xorg-server (2:21.1.13-1) unstable; urgency=medium
+
+  * New upstream release.
+  * Update signing-key.asc.
+  * Add upstream metadata, drop old git url from d/watch.
+  * control: Migrate to pkgconf.
+  * control: Substitute libgl1-mesa-dev build-dep to libglvnd-dev.
+
+ -- Timo Aaltonen <tjaalton@debian.org>  Thu, 29 Aug 2024 15:18:01 +0300
+
 xorg-server (2:21.1.12-1devuan1) unstable; urgency=medium
 
   * Merge tag xorg-server-2_21.1.12-1.
