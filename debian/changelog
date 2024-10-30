@@ -1,3 +1,12 @@
+xorg-server (2:21.1.14-1devuan1) unstable; urgency=medium
+
+  * Merge tag xorg-server-2_21.1.14-1.
+  * Update libseat patch to support inputs added whilst vt is inactive
+    ('paused') (Closes: #862).
+  * d/gbp.conf: set upstream-tag.
+
+ -- Mark Hindley <mark@hindley.org.uk>  Wed, 30 Oct 2024 09:55:35 +0000
+
 xorg-server (2:21.1.14-1) unstable; urgency=high
 
   * New upstream release
