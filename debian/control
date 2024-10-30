@@ -58,7 +58,7 @@ Build-Depends:
  libxcb-shape0-dev,
  libxcb-render0-dev,
  libxcb-render-util0-dev,
- libxcb-util0-dev,
+ libxcb-util-dev,
  libxcb-image0-dev,
  libxcb-icccm4-dev,
  libxcb-shm0-dev,
