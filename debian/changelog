@@ -1,3 +1,10 @@
+xorg-server (2:21.1.7-3+deb12u8) bookworm-security; urgency=high
+
+  * Non-maintainer upload by the Security Team.
+  * xkb: Fix buffer overflow in _XkbSetCompatMap() (CVE-2024-9632)
+
+ -- Salvatore Bonaccorso <carnil@debian.org>  Sat, 26 Oct 2024 13:08:33 +0200
+
 xorg-server (2:21.1.7-3+deb12u7devuan1) daedalus-security; urgency=medium
 
   * Import patcheset from Debian bookworm-security.

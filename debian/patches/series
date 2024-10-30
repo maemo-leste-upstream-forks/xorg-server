@@ -1,3 +1,4 @@
+xkb-Fix-buffer-overflow-in-_XkbSetCompatMap.patch
 0001-Support-libseat.patch
 0002-composite-Fix-use-after-free-of-the-COW.diff
 0001-Xi-randr-fix-handling-of-PropModeAppend-Prepend.patch
