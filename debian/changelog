@@ -1,3 +1,12 @@
+xorg-server (2:21.1.14-2) unstable; urgency=medium
+
+  [ Simon McVittie ]
+  * Disable libunwind on armhf (closes: #1084230, #1085704)
+  * Check basic functionality of xvfb-run at build-time
+  * Add an autopkgtest to verify basic functionality of xvfb-run
+
+ -- Timo Aaltonen <tjaalton@debian.org>  Tue, 12 Nov 2024 15:56:38 +0200
+
 xorg-server (2:21.1.14-1devuan1) unstable; urgency=medium
 
   * Merge tag xorg-server-2_21.1.14-1.
