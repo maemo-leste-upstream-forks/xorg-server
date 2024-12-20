@@ -1,3 +1,9 @@
+xorg-server (2:21.1.15-2devuan1) unstable; urgency=medium
+
+  * Merge tag debian/2%21.1.15-2.
+
+ -- Mark Hindley <mark@hindley.org.uk>  Fri, 20 Dec 2024 08:50:52 +0000
+
 xorg-server (2:21.1.15-2) unstable; urgency=medium
 
   * New upstream release.
