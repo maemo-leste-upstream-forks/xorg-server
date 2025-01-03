@@ -1,3 +1,9 @@
+xorg-server (2:21.1.7+leste1-3+deb12u8devuan1) unstable; urgency=high
+
+  * Rebase Maemo Leste patches from Chimaera
+
+ -- Merlijn Wajer <merlijn@wizzup.org>  Fri, 03 Jan 2025 12:21:38 +0100
+
 xorg-server (2:21.1.7-3+deb12u8devuan1) daedalus-security; urgency=medium
 
   * Version 2:21.1.7-3+deb12u8devuan1.
