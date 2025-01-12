@@ -1,0 +1,35 @@
+From 8552471f8875693355581669884e25d71784dd99 Mon Sep 17 00:00:00 2001
+From: Ivaylo Dimitrov <ivo.g.dimitrov.75@gmail.com>
+Date: Sun, 12 Jan 2025 18:54:22 +0200
+Subject: [PATCH] linux: Fix BUS_PLATFORM detection for non-PCI devices
+
+Commit 74b7427c41b4 (linux: Make platform device probe less fragile)
+effectively dropped busid detection for non-PCI devices, for example on
+OMAP we have "ID_PATH=platform-omapdrm.0". For such devices busid will not
+be set, making platform probes (and server mediated fd support) impossible.
+
+Fix that by extending config_udev_odev_setup_attribs() logic to support
+platform devices as well.
+
+Signed-off-by: Ivaylo Dimitrov <ivo.g.dimitrov.75@gmail.com>
+---
+ config/udev.c | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/config/udev.c b/config/udev.c
+index 836fc2afa..45292fdd7 100644
+--- a/config/udev.c
++++ b/config/udev.c
+@@ -552,6 +552,9 @@ config_udev_odev_setup_attribs(struct udev_device *udev_device, const char *path
+ 
+         attribs->busid = XNFstrdup(value);
+         attribs->busid[3] = ':';
++    } else if (value && (str = strrstr(value, "platform-"))) {
++        value = str + 9;
++        attribs->busid = XNFstrdup(value);
+     }
+ 
+     if (!value)
+-- 
+2.39.5
+

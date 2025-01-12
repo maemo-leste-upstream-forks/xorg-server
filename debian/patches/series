@@ -1,3 +1,4 @@
+0001-linux-Fix-BUS_PLATFORM-detection-for-non-PCI-devices.patch
 xkb-Fix-buffer-overflow-in-_XkbSetCompatMap.patch
 0001-Support-libseat.patch
 0002-composite-Fix-use-after-free-of-the-COW.diff
