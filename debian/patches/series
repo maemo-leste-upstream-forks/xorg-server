@@ -1,8 +1,6 @@
-## Patches with a number < 100 are applied in debian.
-## Ubuntu patches start with 100.
 0001-Support-libseat.patch
 02_kbsd-input-devd.diff
-03_static-nettle.diff
+03_autotools-enable-static-use-of-Nettle-for-SHA1.diff
 05_Revert-Unload-submodules.diff
 06_use-intel-only-on-pre-gen4.diff
 07_use-modesetting-driver-by-default-on-GeForce.diff

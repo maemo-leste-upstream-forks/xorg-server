@@ -59,7 +59,7 @@ confflags_main = \
 	--enable-xnest \
 	--enable-kdrive \
 	--enable-xephyr \
-	--with-sha1=libgcrypt \
+	--with-sha1=libnettle \
 	--enable-xcsecurity \
 	$(void)
 
@@ -90,7 +90,7 @@ confflags_udeb = \
 	--disable-xnest \
 	--disable-kdrive \
 	--disable-xephyr \
-	--with-sha1=libnettle \
+	--with-sha1=nettlestatic \
 	$(void)
 
 ifeq ($(DEB_HOST_ARCH_OS), linux)
