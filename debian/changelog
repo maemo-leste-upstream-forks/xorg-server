@@ -1,3 +1,9 @@
+xorg-server (2:21.1.15-3devuan1) unstable; urgency=medium
+
+  * Merge tag xorg-server-2_21.1.15-3.
+
+ -- Mark Hindley <mark@hindley.org.uk>  Thu, 13 Feb 2025 18:29:15 +0000
+
 xorg-server (2:21.1.15-3) unstable; urgency=medium
 
   [ Daniel Kahn Gillmor ]
