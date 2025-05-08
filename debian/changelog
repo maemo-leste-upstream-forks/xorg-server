@@ -1,3 +1,11 @@
+xorg-server (2:21.1.16-1.1) unstable; urgency=medium
+
+  * Non-maintainer upload.
+  * dix: Hold input lock for AttachDevice() (CVE-2022-49737)
+    (Closes: #1081338)
+
+ -- Salvatore Bonaccorso <carnil@debian.org>  Fri, 02 May 2025 15:04:19 +0200
+
 xorg-server (2:21.1.16-1devuan1) unstable; urgency=medium
 
   * Merge tag xorg-server-2_21.1.16-1.
