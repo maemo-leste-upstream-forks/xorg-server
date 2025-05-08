@@ -3,3 +3,4 @@
 06_use-intel-only-on-pre-gen4.diff
 07_use-modesetting-driver-by-default-on-GeForce.diff
 08_apple_silicon_config.diff
+09_dix-Hold-input-lock-for-AttachDevice.diff 
