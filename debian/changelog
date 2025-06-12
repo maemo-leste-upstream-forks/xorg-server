@@ -1,3 +1,17 @@
+xorg-server (2:21.1.16-1.2) unstable; urgency=medium
+
+  * Non-maintainer upload.
+  * render: Avoid 0 or less animated cursors (CVE-2025-49175)
+  * os: Do not overflow the integer size with BigRequest (CVE-2025-49176)
+  * xfixes: Check request length for SetClientDisconnectMode (CVE-2025-49177)
+  * os: Account for bytes to ignore when sharing input buffer (CVE-2025-49178)
+  * record: Check for overflow in RecordSanityCheckRegisterClients()
+    (CVE-2025-49179)
+  * randr: Check for overflow in RRChangeProviderProperty() (CVE-2025-49180)
+  * xfree86: Check for RandR provider functions (CVE-2025-49180)
+
+ -- Salvatore Bonaccorso <carnil@debian.org>  Thu, 12 Jun 2025 21:03:24 +0200
+
 xorg-server (2:21.1.16-1.1) unstable; urgency=medium
 
   * Non-maintainer upload.
