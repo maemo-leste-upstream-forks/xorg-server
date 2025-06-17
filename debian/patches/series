@@ -5,3 +5,10 @@
 07_use-modesetting-driver-by-default-on-GeForce.diff
 08_apple_silicon_config.diff
 09_dix-Hold-input-lock-for-AttachDevice.diff 
+10_render-Avoid-0-or-less-animated-cursors.diff
+11_os-Do-not-overflow-the-integer-size-with-BigRequest.diff
+12_xfixes-Check-request-length-for-SetClientDisconnectM.diff
+13_os-Account-for-bytes-to-ignore-when-sharing-input-bu.diff
+14_record-Check-for-overflow-in-RecordSanityCheckRegist.diff
+15_randr-Check-for-overflow-in-RRChangeProviderProperty.diff
+16_xfree86-Check-for-RandR-provider-functions.diff
