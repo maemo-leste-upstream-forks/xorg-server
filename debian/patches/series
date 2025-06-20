@@ -11,3 +11,4 @@
 14_record-Check-for-overflow-in-RecordSanityCheckRegist.diff
 15_randr-Check-for-overflow-in-RRChangeProviderProperty.diff
 16_xfree86-Check-for-RandR-provider-functions.diff
+17_os-Check-for-integer-overflow-on-BigRequest-length.diff

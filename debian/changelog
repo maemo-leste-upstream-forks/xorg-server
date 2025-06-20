@@ -1,3 +1,11 @@
+xorg-server (2:21.1.16-1.3) unstable; urgency=medium
+
+  * Non-maintainer upload.
+  * os: Check for integer overflow on BigRequest length (CVE-2025-49176)
+    (Closes: #1108073)
+
+ -- Salvatore Bonaccorso <carnil@debian.org>  Fri, 20 Jun 2025 09:47:20 +0200
+
 xorg-server (2:21.1.16-1.2) unstable; urgency=medium
 
   * Non-maintainer upload.
