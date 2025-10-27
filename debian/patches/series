@@ -12,3 +12,7 @@
 15_randr-Check-for-overflow-in-RRChangeProviderProperty.diff
 16_xfree86-Check-for-RandR-provider-functions.diff
 17_os-Check-for-integer-overflow-on-BigRequest-length.diff
+CVE-2025-62229/0001-present-Fix-use-after-free-in-present_create_notifie.patch
+CVE-2025-62230/0001-xkb-Make-the-RT_XKBCLIENT-resource-private.patch
+CVE-2025-62230/0002-xkb-Free-the-XKB-resource-when-freeing-XkbInterest.patch
+CVE-2025-62231/0001-xkb-Prevent-overflow-in-XkbSetCompatMap.patch
