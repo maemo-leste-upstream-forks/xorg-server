@@ -1,3 +1,13 @@
+xorg-server (2:21.1.16-1.3+deb13u1) trixie-security; urgency=high
+
+  * Non-maintainer upload by the Security Team.
+  * present: Fix use-after-free in present_create_notifies() (CVE-2025-62229)
+  * xkb: Make the RT_XKBCLIENT resource private (CVE-2025-62230)
+  * xkb: Free the XKB resource when freeing XkbInterest (CVE-2025-62230)
+  * xkb: Prevent overflow in XkbSetCompatMap() (CVE-2025-62231)
+
+ -- Salvatore Bonaccorso <carnil@debian.org>  Mon, 27 Oct 2025 18:03:26 +0100
+
 xorg-server (2:21.1.16-1.3devuan1) unstable; urgency=medium
 
   * Merge tag debian/2%21.1.16-1.3.
