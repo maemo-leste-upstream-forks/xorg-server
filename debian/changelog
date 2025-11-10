@@ -1,3 +1,9 @@
+xorg-server (2:21.1.16+leste1-1.3+deb13u1devuan1) unstable; urgency=high
+
+  * Rebase Maemo Leste patches from Excalibur
+
+ -- Merlijn Wajer <merlijn@wizzup.org>  Mon, 10 Nov 2025 10:35:12 +0100
+
 xorg-server (2:21.1.16-1.3+deb13u1devuan1) excalibur-security; urgency=high
 
   * Merge tag debian/2%21.1.16-1.3+deb13u1
