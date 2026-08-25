@@ -1,3 +1,9 @@
+xorg-server (2:21.1.16+leste2-1.3+deb13u1devuan1) unstable; urgency=high
+
+  * [PATCH] DPMS: Don't wake display from input when timeouts are
+
+ -- Ivaylo Dimitrov <ivo.g.dimitrov.75@gmail.com>  Tue, 25 Aug 2026 16:30:31 +0300
+
 xorg-server (2:21.1.16+leste1-1.3+deb13u1devuan1) unstable; urgency=high
 
   * Rebase Maemo Leste patches from Excalibur
