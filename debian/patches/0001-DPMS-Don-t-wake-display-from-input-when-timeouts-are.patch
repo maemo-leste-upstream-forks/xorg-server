@@ -1,0 +1,47 @@
+From 09c7bee312c70948a3d8513821e62a0f8999fe87 Mon Sep 17 00:00:00 2001
+From: Ivaylo Dimitrov <ivo.g.dimitrov.75@gmail.com>
+Date: Tue, 25 Aug 2026 19:17:35 +0300
+Subject: [PATCH] DPMS: Don't wake display from input when timeouts are
+ disabled
+
+When DPMS is active, `mieqProcessInputEvents()` unconditionally
+switches the display back to `DPMSModeOn` for every input event.
+
+This prevents systems from keeping the display powered off while still
+allowing applications to use input devices when DPMS is externally
+managed by disabling all screen-saver and DPMS timeouts.
+
+When all screen-saver and DPMS timeouts are disabled, the current DPMS
+state is assumed to be externally managed and should not be overridden
+by input activity.
+
+Keep input processing unchanged so devices such as media buttons remain
+usable while the display is off.
+
+Signed-off-by: Ivaylo Dimitrov <ivo.g.dimitrov.75@gmail.com>
+---
+ mi/mieq.c | 8 +++++++-
+ 1 file changed, 7 insertions(+), 1 deletion(-)
+
+diff --git a/mi/mieq.c b/mi/mieq.c
+index c98d46862..d24b65644 100644
+--- a/mi/mieq.c
++++ b/mi/mieq.c
+@@ -556,7 +556,13 @@ mieqProcessInputEvents(void)
+         else if (DPMSPowerLevel != DPMSModeOn)
+             SetScreenSaverTimer();
+ 
+-        if (DPMSPowerLevel != DPMSModeOn)
++        /* Only allow input activity to wake the display when an automatic
++         * screen-saver or DPMS timeout is configured. If all timeouts are
++         * disabled, the current DPMS state is assumed to be externally managed
++         * and must not be overridden by input activity. */
++        if (DPMSPowerLevel != DPMSModeOn &&
++            (ScreenSaverTime > 0 || DPMSStandbyTime > 0 ||
++             DPMSSuspendTime > 0 || DPMSOffTime > 0))
+             DPMSSet(serverClient, DPMSModeOn);
+ #endif
+ 
+-- 
+2.47.3
+

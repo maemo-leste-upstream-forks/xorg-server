@@ -18,3 +18,4 @@ CVE-2025-62230/0001-xkb-Make-the-RT_XKBCLIENT-resource-private.patch
 CVE-2025-62230/0002-xkb-Free-the-XKB-resource-when-freeing-XkbInterest.patch
 CVE-2025-62231/0001-xkb-Prevent-overflow-in-XkbSetCompatMap.patch
 0001-linux-Fix-BUS_PLATFORM-detection-for-non-PCI-devices.patch
+0001-DPMS-Don-t-wake-display-from-input-when-timeouts-are.patch
